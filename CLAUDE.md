@@ -67,7 +67,10 @@ Each tool follows a consistent pattern in `src/tools/`:
 - Use `import` statements, never `require()`
 
 ### Tool Categories
-1. **Creation Tools** (`add_todo`, `add_project`): No auth required, use URL scheme
+1. **Creation Tools** (`add_todo`, `add_project`): No auth required, use URL scheme with JSON schema structure
+   - Parameters structured as `{attributes: {...}}` format
+   - Attributes include array fields (tags, checklist-items, items) converted to comma-separated strings
+   - Field validation with max lengths and enum constraints
 2. **Update Tools** (`update_todo`, `update_project`): Require auth token, use URL scheme with JSON schema structure
    - Parameters structured as `{id: string, attributes: {...}}` format
    - Attributes include array fields (tags, checklist-items) converted to comma-separated strings
@@ -92,6 +95,6 @@ Each tool follows a consistent pattern in `src/tools/`:
 All tools follow MCP best practices with:
 - Action-oriented descriptions starting with verbs
 - Clear parameter explanations with examples
-- Specific format requirements (ISO dates, array values for update tools)
+- Specific format requirements (ISO dates, array values)
 - Default value documentation
-- JSON schema compliance for update operations
+- JSON schema compliance for all creation and update operations
