@@ -9,13 +9,17 @@ export interface ThingsTodo {
   name: string;
   notes?: string;
   project?: string;
+  projectId?: string;
   area?: string;
+  areaId?: string;
   tags: string[];
   completionDate?: Date;
   dueDate?: Date;
+  activationDate?: Date;
   status: 'open' | 'completed' | 'canceled';
   creationDate: Date;
   modificationDate: Date;
+  type: 'to-do';
 }
 
 export interface ThingsProject {
@@ -23,17 +27,21 @@ export interface ThingsProject {
   name: string;
   notes?: string;
   area?: string;
+  areaId?: string;
   tags: string[];
   completionDate?: Date;
   dueDate?: Date;
+  activationDate?: Date;
   status: 'open' | 'completed' | 'canceled';
   creationDate: Date;
   modificationDate: Date;
+  type: 'project';
 }
 
 export interface ThingsArea {
   id: string;
   name: string;
+  notes?: string;
   tags: string[];
 }
 
@@ -51,6 +59,109 @@ export interface ListOptions {
   dueAfter?: Date;
   modifiedAfter?: Date;
   limit?: number;
+}
+
+// Utility functions for TypeScript filtering
+function applyTodoFilters(todos: ThingsTodo[], options: ListOptions): ThingsTodo[] {
+  let filtered = todos;
+
+  if (options.status && options.status !== 'all') {
+    filtered = filtered.filter(todo => todo.status === options.status);
+  }
+
+  if (options.project) {
+    filtered = filtered.filter(todo => 
+      todo.project?.toLowerCase().includes(options.project!.toLowerCase())
+    );
+  }
+
+  if (options.area) {
+    filtered = filtered.filter(todo => 
+      todo.area?.toLowerCase().includes(options.area!.toLowerCase())
+    );
+  }
+
+  if (options.tags && options.tags.length > 0) {
+    filtered = filtered.filter(todo => 
+      options.tags!.every(tag => 
+        todo.tags.some(todoTag => 
+          todoTag.toLowerCase().includes(tag.toLowerCase())
+        )
+      )
+    );
+  }
+
+  if (options.dueBefore) {
+    filtered = filtered.filter(todo => 
+      todo.dueDate && todo.dueDate < options.dueBefore!
+    );
+  }
+
+  if (options.dueAfter) {
+    filtered = filtered.filter(todo => 
+      todo.dueDate && todo.dueDate > options.dueAfter!
+    );
+  }
+
+  if (options.modifiedAfter) {
+    filtered = filtered.filter(todo => 
+      todo.modificationDate > options.modifiedAfter!
+    );
+  }
+
+  if (options.limit) {
+    filtered = filtered.slice(0, options.limit);
+  }
+
+  return filtered;
+}
+
+function applyProjectFilters(projects: ThingsProject[], options: ListOptions): ThingsProject[] {
+  let filtered = projects;
+
+  if (options.status && options.status !== 'all') {
+    filtered = filtered.filter(project => project.status === options.status);
+  }
+
+  if (options.area) {
+    filtered = filtered.filter(project => 
+      project.area?.toLowerCase().includes(options.area!.toLowerCase())
+    );
+  }
+
+  if (options.tags && options.tags.length > 0) {
+    filtered = filtered.filter(project => 
+      options.tags!.every(tag => 
+        project.tags.some(projectTag => 
+          projectTag.toLowerCase().includes(tag.toLowerCase())
+        )
+      )
+    );
+  }
+
+  if (options.dueBefore) {
+    filtered = filtered.filter(project => 
+      project.dueDate && project.dueDate < options.dueBefore!
+    );
+  }
+
+  if (options.dueAfter) {
+    filtered = filtered.filter(project => 
+      project.dueDate && project.dueDate > options.dueAfter!
+    );
+  }
+
+  if (options.modifiedAfter) {
+    filtered = filtered.filter(project => 
+      project.modificationDate > options.modifiedAfter!
+    );
+  }
+
+  if (options.limit) {
+    filtered = filtered.slice(0, options.limit);
+  }
+
+  return filtered;
 }
 
 export async function executeAppleScript(script: string): Promise<string> {
@@ -71,11 +182,12 @@ export async function executeAppleScript(script: string): Promise<string> {
 }
 
 export async function listTodos(options: ListOptions = {}): Promise<ThingsTodo[]> {
-  let script = `
+  const script = `
     tell application "Things3"
       set todoList to every to do
       set todoData to ""
       
+      -- Process todos
       repeat with todo in todoList
         set todoId to id of todo
         set todoName to name of todo
@@ -88,13 +200,17 @@ export async function listTodos(options: ListOptions = {}): Promise<ThingsTodo[]
         set todoModificationDate to modification date of todo as string
         
         set todoProject to ""
+        set todoProjectId to ""
         try
           set todoProject to name of project of todo
+          set todoProjectId to id of project of todo
         end try
         
         set todoArea to ""
+        set todoAreaId to ""
         try
           set todoArea to name of area of todo
+          set todoAreaId to id of area of todo
         end try
         
         set todoDueDate to ""
@@ -105,6 +221,16 @@ export async function listTodos(options: ListOptions = {}): Promise<ThingsTodo[]
           end if
         end try
         
+        set todoScheduledDate to ""
+        
+        set todoActivationDate to ""
+        try
+          set activationDate to activation date of todo
+          if activationDate is not missing value then
+            set todoActivationDate to activationDate as string
+          end if
+        end try
+        
         set todoCompletionDate to ""
         try
           set completionDate to completion date of todo
@@ -112,6 +238,10 @@ export async function listTodos(options: ListOptions = {}): Promise<ThingsTodo[]
             set todoCompletionDate to completionDate as string
           end if
         end try
+        
+        set todoDelegatedPerson to ""
+        
+        set todoListName to ""
         
         set todoTags to ""
         try
@@ -126,7 +256,7 @@ export async function listTodos(options: ListOptions = {}): Promise<ThingsTodo[]
           end repeat
         end try
         
-        set todoEntry to todoId & "|" & todoName & "|" & todoNotes & "|" & todoStatus & "|" & todoProject & "|" & todoArea & "|" & todoDueDate & "|" & todoCompletionDate & "|" & todoTags & "|" & todoCreationDate & "|" & todoModificationDate
+        set todoEntry to todoId & "|" & todoName & "|" & todoNotes & "|" & todoStatus & "|" & todoProject & "|" & todoProjectId & "|" & todoArea & "|" & todoAreaId & "|" & todoDueDate & "|" & todoScheduledDate & "|" & todoActivationDate & "|" & todoCompletionDate & "|" & todoDelegatedPerson & "|" & todoListName & "|" & todoTags & "|" & todoCreationDate & "|" & todoModificationDate
         
         if todoData is "" then
           set todoData to todoEntry
@@ -139,17 +269,13 @@ export async function listTodos(options: ListOptions = {}): Promise<ThingsTodo[]
     end tell
   `;
 
-  // Apply status filter if specified
-  if (options.status && options.status !== 'all') {
-    script = script.replace('every to do', `every to do whose status is ${options.status}`);
-  }
-
   const result = await executeAppleScript(script);
-  return parseAppleScriptTodoList(result);
+  const todos = parseAppleScriptTodoList(result);
+  return applyTodoFilters(todos, options);
 }
 
 export async function listProjects(options: ListOptions = {}): Promise<ThingsProject[]> {
-  let script = `
+  const script = `
     tell application "Things3"
       set projectList to every project
       set projectData to ""
@@ -166,8 +292,10 @@ export async function listProjects(options: ListOptions = {}): Promise<ThingsPro
         set projModificationDate to modification date of proj as string
         
         set projArea to ""
+        set projAreaId to ""
         try
           set projArea to name of area of proj
+          set projAreaId to id of area of proj
         end try
         
         set projDueDate to ""
@@ -178,6 +306,16 @@ export async function listProjects(options: ListOptions = {}): Promise<ThingsPro
           end if
         end try
         
+        set projScheduledDate to ""
+        
+        set projActivationDate to ""
+        try
+          set activationDate to activation date of proj
+          if activationDate is not missing value then
+            set projActivationDate to activationDate as string
+          end if
+        end try
+        
         set projCompletionDate to ""
         try
           set completionDate to completion date of proj
@@ -185,6 +323,10 @@ export async function listProjects(options: ListOptions = {}): Promise<ThingsPro
             set projCompletionDate to completionDate as string
           end if
         end try
+        
+        set projDelegatedPerson to ""
+        
+        set projListName to ""
         
         set projTags to ""
         try
@@ -199,7 +341,7 @@ export async function listProjects(options: ListOptions = {}): Promise<ThingsPro
           end repeat
         end try
         
-        set projEntry to projId & "|" & projName & "|" & projNotes & "|" & projStatus & "|" & projArea & "|" & projDueDate & "|" & projCompletionDate & "|" & projTags & "|" & projCreationDate & "|" & projModificationDate
+        set projEntry to projId & "|" & projName & "|" & projNotes & "|" & projStatus & "|" & projArea & "|" & projAreaId & "|" & projDueDate & "|" & projScheduledDate & "|" & projActivationDate & "|" & projCompletionDate & "|" & projDelegatedPerson & "|" & projListName & "|" & projTags & "|" & projCreationDate & "|" & projModificationDate
         
         if projectData is "" then
           set projectData to projEntry
@@ -212,13 +354,9 @@ export async function listProjects(options: ListOptions = {}): Promise<ThingsPro
     end tell
   `;
 
-  // Apply status filter if specified
-  if (options.status && options.status !== 'all') {
-    script = script.replace('every project', `every project whose status is ${options.status}`);
-  }
-
   const result = await executeAppleScript(script);
-  return parseAppleScriptProjectList(result);
+  const projects = parseAppleScriptProjectList(result);
+  return applyProjectFilters(projects, options);
 }
 
 export async function listAreas(): Promise<ThingsArea[]> {
@@ -231,6 +369,11 @@ export async function listAreas(): Promise<ThingsArea[]> {
         set currentArea to item i of areaList
         set areaId to id of currentArea
         set areaName to name of currentArea
+        
+        set areaNotes to ""
+        try
+          set areaNotes to notes of currentArea
+        end try
         
         set areaTags to ""
         try
@@ -245,7 +388,7 @@ export async function listAreas(): Promise<ThingsArea[]> {
           end repeat
         end try
         
-        set areaEntry to areaId & "|" & areaName & "|" & areaTags
+        set areaEntry to areaId & "|" & areaName & "|" & areaNotes & "|" & areaTags
         
         if areaData is "" then
           set areaData to areaEntry
@@ -312,6 +455,76 @@ export async function deleteProject(id: string): Promise<void> {
   logger.info('Project deleted successfully', { id });
 }
 
+// Helper function to parse AppleScript dates
+function parseAppleScriptDate(dateString: string): Date | undefined {
+  if (!dateString || dateString === '' || dateString === 'missing value') {
+    return undefined;
+  }
+  
+  try {
+    // First try standard parsing
+    let parsed = new Date(dateString);
+    if (!isNaN(parsed.getTime())) {
+      return parsed;
+    }
+    
+    // Try removing English day name and "at"
+    const cleanedEnglishDate = dateString
+      .replace(/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),?\s*/i, '')
+      .replace(/\sat\s/i, ' ');
+    
+    parsed = new Date(cleanedEnglishDate);
+    if (!isNaN(parsed.getTime())) {
+      return parsed;
+    }
+    
+    // Try manual parsing for English "Month DD, YYYY at HH:MM:SS AM/PM" format
+    const englishMatch = dateString.match(/(\w+)\s+(\d{1,2}),\s+(\d{4})\s+at\s+(\d{1,2}):(\d{2}):(\d{2})\s+(AM|PM)/i);
+    if (englishMatch) {
+      const [, month, day, year, hour, minute, second, ampm] = englishMatch;
+      const date = new Date(`${month} ${day}, ${year} ${hour}:${minute}:${second} ${ampm}`);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+    
+    // Try parsing Chinese date format: "2025年6月6日 星期五 09:40:34"
+    const chineseMatch = dateString.match(/(\d{4})年(\d{1,2})月(\d{1,2})日\s+(?:星期[一二三四五六日])\s+(\d{1,2}):(\d{2}):(\d{2})/);
+    if (chineseMatch) {
+      const [, year, month, day, hour, minute, second] = chineseMatch;
+      // Month is 0-indexed in JavaScript Date
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), parseInt(second));
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+    
+    // Try parsing Chinese date format without weekday: "2025年6月6日 09:40:34"
+    const chineseMatchNoWeekday = dateString.match(/(\d{4})年(\d{1,2})月(\d{1,2})日\s+(\d{1,2}):(\d{2}):(\d{2})/);
+    if (chineseMatchNoWeekday) {
+      const [, year, month, day, hour, minute, second] = chineseMatchNoWeekday;
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), parseInt(second));
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+    
+    // Try parsing Chinese date format for midnight: "2025年7月1日 星期二 00:00:00"
+    const chineseMidnightMatch = dateString.match(/(\d{4})年(\d{1,2})月(\d{1,2})日(?:\s+星期[一二三四五六日])?\s+00:00:00/);
+    if (chineseMidnightMatch) {
+      const [, year, month, day] = chineseMidnightMatch;
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+    
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // Helper functions to parse AppleScript output
 function parseAppleScriptTodoList(output: string): ThingsTodo[] {
   if (!output || output.trim() === '') {
@@ -320,30 +533,46 @@ function parseAppleScriptTodoList(output: string): ThingsTodo[] {
   
   try {
     const entries = output.split('\n').filter(line => line.trim() !== '');
-    return entries.map(entry => {
-      const parts = entry.split('|');
-      if (parts.length < 11) {
-        throw new Error(`Invalid entry format: ${entry}`);
+    const parsedTodos: ThingsTodo[] = [];
+    
+    for (const entry of entries) {
+      try {
+        const parts = entry.split('|');
+        if (parts.length < 17) {
+          logger.warn('Skipping entry with insufficient fields', { entry, fieldCount: parts.length });
+          continue;
+        }
+        
+        const [id, name, notes, status, project, projectId, area, areaId, dueDate, scheduledDate, activationDate, completionDate, delegatedPerson, listName, tags, creationDate, modificationDate] = parts;
+        
+        const todo: ThingsTodo = {
+          id,
+          name,
+          notes: notes || undefined,
+          project: project || undefined,
+          projectId: projectId || undefined,
+          area: area || undefined,
+          areaId: areaId || undefined,
+          tags: tags ? tags.split(',').filter(Boolean) : [],
+          completionDate: parseAppleScriptDate(completionDate),
+          dueDate: parseAppleScriptDate(dueDate),
+          activationDate: parseAppleScriptDate(activationDate),
+          status: status as 'open' | 'completed' | 'canceled',
+          creationDate: parseAppleScriptDate(creationDate) || new Date(),
+          modificationDate: parseAppleScriptDate(modificationDate) || new Date(),
+          type: 'to-do' as const
+        };
+        
+        parsedTodos.push(todo);
+      } catch (entryError) {
+        logger.warn('Failed to parse individual todo entry', { entry, error: entryError });
+        // Continue with next entry instead of failing entire parse
       }
-      
-      const [id, name, notes, status, project, area, dueDate, completionDate, tags, creationDate, modificationDate] = parts;
-      
-      return {
-        id,
-        name,
-        notes: notes || undefined,
-        project: project || undefined,
-        area: area || undefined,
-        tags: tags ? tags.split(',').filter(Boolean) : [],
-        completionDate: completionDate && completionDate !== '' ? new Date(completionDate) : undefined,
-        dueDate: dueDate && dueDate !== '' ? new Date(dueDate) : undefined,
-        status: status as 'open' | 'completed' | 'canceled',
-        creationDate: creationDate && creationDate !== '' ? new Date(creationDate) : new Date(),
-        modificationDate: modificationDate && modificationDate !== '' ? new Date(modificationDate) : new Date()
-      };
-    });
+    }
+    
+    return parsedTodos;
   } catch (error) {
-    logger.error('Failed to parse todo list output', { output, error });
+    logger.error('Failed to parse todo list output', { output: output.length > 1000 ? `${output.substring(0, 1000)}...` : output, error });
     return [];
   }
 }
@@ -357,23 +586,26 @@ function parseAppleScriptProjectList(output: string): ThingsProject[] {
     const entries = output.split('\n').filter(line => line.trim() !== '');
     return entries.map(entry => {
       const parts = entry.split('|');
-      if (parts.length < 10) {
+      if (parts.length < 15) {
         throw new Error(`Invalid entry format: ${entry}`);
       }
       
-      const [id, name, notes, status, area, dueDate, completionDate, tags, creationDate, modificationDate] = parts;
+      const [id, name, notes, status, area, areaId, dueDate, scheduledDate, activationDate, completionDate, delegatedPerson, listName, tags, creationDate, modificationDate] = parts;
       
       return {
         id,
         name,
         notes: notes || undefined,
         area: area || undefined,
+        areaId: areaId || undefined,
         tags: tags ? tags.split(',').filter(Boolean) : [],
-        completionDate: completionDate && completionDate !== '' ? new Date(completionDate) : undefined,
-        dueDate: dueDate && dueDate !== '' ? new Date(dueDate) : undefined,
+        completionDate: parseAppleScriptDate(completionDate),
+        dueDate: parseAppleScriptDate(dueDate),
+        activationDate: parseAppleScriptDate(activationDate),
         status: status as 'open' | 'completed' | 'canceled',
-        creationDate: creationDate && creationDate !== '' ? new Date(creationDate) : new Date(),
-        modificationDate: modificationDate && modificationDate !== '' ? new Date(modificationDate) : new Date()
+        creationDate: parseAppleScriptDate(creationDate) || new Date(),
+        modificationDate: parseAppleScriptDate(modificationDate) || new Date(),
+        type: 'project' as const
       };
     });
   } catch (error) {
@@ -391,15 +623,16 @@ function parseAppleScriptAreaList(output: string): ThingsArea[] {
     const entries = output.split('\n').filter(line => line.trim() !== '');
     return entries.map(entry => {
       const parts = entry.split('|');
-      if (parts.length < 3) {
+      if (parts.length < 4) {
         throw new Error(`Invalid area entry format: ${entry}`);
       }
       
-      const [id, name, tags] = parts;
+      const [id, name, notes, tags] = parts;
       
       return {
         id,
         name,
+        notes: notes || undefined,
         tags: tags ? tags.split(',').filter(Boolean) : []
       };
     });

@@ -47,6 +47,13 @@ function formatAreasAsText(areas: any[]): string {
   for (const area of areas) {
     result += `• ${area.name}\n  ID: ${area.id}`;
     
+    if (area.notes) {
+      const truncatedNotes = area.notes.length > 100 
+        ? area.notes.substring(0, 100) + '...' 
+        : area.notes;
+      result += `\n  Notes: ${truncatedNotes}`;
+    }
+    
     if (area.tags && area.tags.length > 0) {
       result += `\n  Tags: ${area.tags.join(', ')}`;
     }

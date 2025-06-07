@@ -43,56 +43,7 @@ export function registerListTodosTool(server: McpServer): void {
         }
 
         const todos = await listTodos(options);
-
-        // Apply additional filters that couldn't be handled in AppleScript
-        let filteredTodos = todos;
-
-        if (options.project) {
-          filteredTodos = filteredTodos.filter(todo => 
-            todo.project?.toLowerCase().includes(options.project!.toLowerCase())
-          );
-        }
-
-        if (options.area) {
-          filteredTodos = filteredTodos.filter(todo => 
-            todo.area?.toLowerCase().includes(options.area!.toLowerCase())
-          );
-        }
-
-        if (options.tags && options.tags.length > 0) {
-          filteredTodos = filteredTodos.filter(todo => 
-            options.tags!.every(tag => 
-              todo.tags.some(todoTag => 
-                todoTag.toLowerCase().includes(tag.toLowerCase())
-              )
-            )
-          );
-        }
-
-        if (options.dueBefore) {
-          filteredTodos = filteredTodos.filter(todo => 
-            todo.dueDate && todo.dueDate < options.dueBefore!
-          );
-        }
-
-        if (options.dueAfter) {
-          filteredTodos = filteredTodos.filter(todo => 
-            todo.dueDate && todo.dueDate > options.dueAfter!
-          );
-        }
-
-        if (options.modifiedAfter) {
-          filteredTodos = filteredTodos.filter(todo => 
-            todo.modificationDate > options.modifiedAfter!
-          );
-        }
-
-        // Apply limit
-        if (options.limit) {
-          filteredTodos = filteredTodos.slice(0, options.limit);
-        }
-
-        const resultText = formatTodosAsText(filteredTodos);
+        const resultText = formatTodosAsText(todos);
 
         return {
           content: [{
@@ -125,30 +76,38 @@ function formatTodosAsText(todos: any[]): string {
     }
     
     result += `\n  ID: ${todo.id}`;
+    result += `\n  Status: ${todo.status}`;
     
-    if (todo.project) {
-      result += `\n  Project: ${todo.project}`;
-    }
+    // Display all date properties
+    result += `\n  📅 Due Date: ${todo.dueDate ? todo.dueDate.toISOString().split('T')[0] : 'None'}`;
+    result += `\n  🚀 Activation Date: ${todo.activationDate ? todo.activationDate.toISOString().split('T')[0] : 'None'}`;
+    result += `\n  ✅ Completion Date: ${todo.completionDate ? todo.completionDate.toISOString().split('T')[0] : 'None'}`;
     
-    if (todo.area) {
-      result += `\n  Area: ${todo.area}`;
-    }
+    // Display project information
+    result += `\n  📁 Project: ${todo.project || 'None'}`;
+    result += `\n  📁 Project ID: ${todo.projectId || 'None'}`;
     
-    if (todo.tags && todo.tags.length > 0) {
-      result += `\n  Tags: ${todo.tags.join(', ')}`;
-    }
+    // Display area information
+    result += `\n  🏷️  Area: ${todo.area || 'None'}`;
+    result += `\n  🏷️  Area ID: ${todo.areaId || 'None'}`;
     
-    if (todo.dueDate) {
-      result += `\n  Due: ${todo.dueDate.toISOString().split('T')[0]}`;
-    }
+    // Display tags
+    result += `\n  🏷️  Tags: ${todo.tags && todo.tags.length > 0 ? todo.tags.join(', ') : 'None'}`;
     
+    // Display notes
     if (todo.notes) {
       const truncatedNotes = todo.notes.length > 100 
         ? todo.notes.substring(0, 100) + '...' 
         : todo.notes;
-      result += `\n  Notes: ${truncatedNotes}`;
+      result += `\n  📝 Notes: ${truncatedNotes}`;
+    } else {
+      result += `\n  📝 Notes: None`;
     }
     
+    // Display metadata
+    result += `\n  📅 Created: ${todo.creationDate.toISOString().split('T')[0]}`;
+    result += `\n  ✏️  Modified: ${todo.modificationDate.toISOString().split('T')[0]}`;
+    result += `\n  🔖 Type: ${todo.type}`;
     result += '\n\n';
   }
 

@@ -41,50 +41,7 @@ export function registerListProjectsTool(server: McpServer): void {
         }
 
         const projects = await listProjects(options);
-
-        // Apply additional filters
-        let filteredProjects = projects;
-
-        if (options.area) {
-          filteredProjects = filteredProjects.filter(project => 
-            project.area?.toLowerCase().includes(options.area!.toLowerCase())
-          );
-        }
-
-        if (options.tags && options.tags.length > 0) {
-          filteredProjects = filteredProjects.filter(project => 
-            options.tags!.every(tag => 
-              project.tags.some(projectTag => 
-                projectTag.toLowerCase().includes(tag.toLowerCase())
-              )
-            )
-          );
-        }
-
-        if (options.dueBefore) {
-          filteredProjects = filteredProjects.filter(project => 
-            project.dueDate && project.dueDate < options.dueBefore!
-          );
-        }
-
-        if (options.dueAfter) {
-          filteredProjects = filteredProjects.filter(project => 
-            project.dueDate && project.dueDate > options.dueAfter!
-          );
-        }
-
-        if (options.modifiedAfter) {
-          filteredProjects = filteredProjects.filter(project => 
-            project.modificationDate > options.modifiedAfter!
-          );
-        }
-
-        // Apply limit
-        if (options.limit) {
-          filteredProjects = filteredProjects.slice(0, options.limit);
-        }
-
-        const resultText = formatProjectsAsText(filteredProjects);
+        const resultText = formatProjectsAsText(projects);
 
         return {
           content: [{
@@ -118,16 +75,28 @@ function formatProjectsAsText(projects: any[]): string {
     
     result += `\n  ID: ${project.id}`;
     
+    // Display dates prominently at the top
+    const dates = [];
+    if (project.dueDate) {
+      dates.push(`📅 Due: ${project.dueDate.toISOString().split('T')[0]}`);
+    }
+    if (project.activationDate) {
+      dates.push(`🚀 Starts: ${project.activationDate.toISOString().split('T')[0]}`);
+    }
+    if (project.completionDate) {
+      dates.push(`✅ Completed: ${project.completionDate.toISOString().split('T')[0]}`);
+    }
+    
+    if (dates.length > 0) {
+      result += `\n  ${dates.join(' | ')}`;
+    }
+    
     if (project.area) {
       result += `\n  Area: ${project.area}`;
     }
     
     if (project.tags && project.tags.length > 0) {
       result += `\n  Tags: ${project.tags.join(', ')}`;
-    }
-    
-    if (project.dueDate) {
-      result += `\n  Due: ${project.dueDate.toISOString().split('T')[0]}`;
     }
     
     if (project.notes) {
@@ -137,6 +106,9 @@ function formatProjectsAsText(projects: any[]): string {
       result += `\n  Notes: ${truncatedNotes}`;
     }
     
+    // Add metadata at the bottom
+    result += `\n  📝 Created: ${project.creationDate.toISOString().split('T')[0]}`;
+    result += `\n  ✏️  Modified: ${project.modificationDate.toISOString().split('T')[0]}`;
     result += '\n\n';
   }
 
