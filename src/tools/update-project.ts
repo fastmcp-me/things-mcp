@@ -51,7 +51,7 @@ const updateProjectSchema = z.object({
 export function registerUpdateProjectTool(server: McpServer): void {
   server.tool(
     'update_project',
-    'Update an existing project in Things.app with comprehensive modification options. Requires THINGS_AUTH_TOKEN. Can modify any property including title, notes, scheduling, tags, area assignment, and completion status. Supports both replacement and append/prepend operations for notes to maintain project history.',
+    'Update an existing project in Things.app. Modify title, notes, scheduling, tags, area assignment, and completion status.',
     updateProjectSchema.shape,
     async (params) => {
       try {

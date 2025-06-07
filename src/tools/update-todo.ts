@@ -73,7 +73,7 @@ const updateTodoSchema = z.object({
 export function registerUpdateTodoTool(server: McpServer): void {
   server.tool(
     'update_todo',
-    'Update an existing to-do item in Things.app with comprehensive modification options. Requires THINGS_AUTH_TOKEN. Can modify any property including title, notes, scheduling, tags, checklist items, project/area assignment, and completion status. Supports both replacement and append/prepend operations for notes and checklist items.',
+    'Update an existing to-do item in Things.app. Modify title, notes, scheduling, tags, checklist items, project/area assignment, and completion status.',
     updateTodoSchema.shape,
     async (params) => {
       try {

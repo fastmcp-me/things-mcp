@@ -1,166 +1,156 @@
 # Things MCP Server
 
-A Model Context Protocol (MCP) server that integrates with Things.app on macOS, allowing LLMs to interact with your task management system through the Things URL scheme.
+Control your Things.app tasks directly from Claude Code, Claude Desktop, Cursor, and other AI assistants using the Model Context Protocol (MCP).
 
-## Features
+## What It Does
 
-- ✅ Create to-dos and projects
-- ✅ Update existing items (requires auth token)
-- ✅ Navigate to specific views and items
-- ✅ Search functionality
-- ✅ Advanced JSON import for bulk operations
-- ✅ Full TypeScript implementation with type safety
+This MCP server lets AI assistants interact with your Things.app tasks on macOS. You can:
 
-## Installation
+- **Create** new tasks and projects
+- **Update** existing items 
+- **View** your task database with detailed summaries
+- **Schedule** tasks for specific dates
+- **Organize** with areas, tags, and deadlines
+
+## Quick Start
+
+### 1. Install
 
 ```bash
+git clone https://github.com/your-username/things-mcp.git
+cd things-mcp
 npm install
 npm run build
 ```
 
-## Configuration
+### 2. Get Things Authorization Token
 
-For update operations, you need to set the `THINGS_AUTH_TOKEN` environment variable:
+For updating existing tasks, you need an authorization token:
 
-1. Open Things.app on macOS
-2. Go to Preferences → General → Enable Things URLs
-3. Copy your authorization token
-4. Set the environment variable:
+1. Open **Things.app** on macOS
+2. Go to **Things → Preferences → General** 
+3. Check **"Enable Things URLs"**
+4. Copy the authorization token that appears
+5. Set it as an environment variable:
 
 ```bash
 export THINGS_AUTH_TOKEN="your-token-here"
 ```
 
+### 3. Configure Your AI Assistant
+
+#### Claude Code
+Add to your project's `.claude_code_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "things": {
+      "command": "node",
+      "args": ["/path/to/things-mcp/build/src/index.js"],
+      "env": {
+        "THINGS_AUTH_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
+```
+
+#### Claude Desktop
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
+
+```json
+{
+  "mcpServers": {
+    "things": {
+      "command": "node",
+      "args": ["/path/to/things-mcp/build/src/index.js"],
+      "env": {
+        "THINGS_AUTH_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
+```
+
+#### Cursor IDE
+Create `.cursor/mcp.json` in your project or `~/.cursor/mcp.json` globally:
+
+```json
+{
+  "things": {
+    "command": "node",
+    "args": ["/path/to/things-mcp/build/src/index.js"],
+    "env": {
+      "THINGS_AUTH_TOKEN": "your-token-here"
+    }
+  }
+}
+```
+
+### 4. Restart Your AI Assistant
+
+After configuration, restart your AI assistant to load the MCP server.
+
+## Use Cases
+
+### Daily Planning
+"Show me my today's tasks and create a project for the new marketing campaign with initial tasks for research, design, and content creation."
+
+### Project Management  
+"Update the mobile app project to add design review and testing tasks, then schedule the design review for next Monday."
+
+### Task Organization
+"Move all my unscheduled shopping tasks to the 'Personal' area and tag them with 'weekend'."
+
+### Progress Tracking
+"Give me a summary of all active projects with their deadlines and completion status."
+
+### Quick Capture
+"Create a task to call the dentist, schedule it for tomorrow, and set a deadline for end of week."
+
 ## Available Tools
 
-### `add_todo`
-Create a new to-do in Things.
+### `things_summary`
+Get a complete overview of your Things database including tasks, projects, areas, and tags. Returns formatted markdown or structured JSON.
 
-**Parameters:**
-- `title` (required): The title of the to-do
-- `notes` (optional): Additional notes
-- `when` (optional): Schedule date (today, tomorrow, evening, anytime, someday, or ISO date)
-- `deadline` (optional): Deadline (ISO date format)
-- `tags` (optional): Comma-separated tags
-- `checklist_items` (optional): Newline-separated checklist items
-- `list` (optional): Project/area to add to
-- `heading` (optional): Heading within project
-- `completed` (optional): Mark as completed
-- `canceled` (optional): Mark as canceled
+### `add_todo` 
+Create new tasks with scheduling, deadlines, tags, and checklist items.
 
 ### `add_project`
-Create a new project in Things.
+Create new projects with initial tasks, areas, and scheduling.
 
-**Parameters:**
-- `title` (required): The title of the project
-- `notes` (optional): Project notes
-- `when` (optional): Schedule date
-- `deadline` (optional): Project deadline
-- `tags` (optional): Comma-separated tags
-- `area` (optional): Parent area
-- `todos` (optional): Initial to-dos (newline-separated)
+### `update_todo` / `update_project`
+Modify existing items (requires auth token).
 
-### `update_todo`
-Update an existing to-do (requires auth token).
-
-**Parameters:**
-- `id` (required): The ID of the to-do to update
-- All parameters from `add_todo` (optional)
-- `prepend_notes` (optional): Text to prepend to notes
-- `append_notes` (optional): Text to append to notes
-- `add_tags` (optional): Tags to add (keeps existing)
-- `add_checklist_items` (optional): Checklist items to add
-
-### `update_project`
-Update an existing project (requires auth token).
-
-**Parameters:**
-- `id` (required): The ID of the project to update
-- All parameters from `add_project` (optional)
-- `prepend_notes` (optional): Text to prepend to notes
-- `append_notes` (optional): Text to append to notes
-- `add_tags` (optional): Tags to add (keeps existing)
-
-### `show`
-Navigate to specific views or items in Things.
-
-**Parameters:**
-- `id` (optional): Item ID or view name (today, anytime, upcoming, someday, logbook, deadlines)
-- `query` (optional): Filter query
-
-### `search`
-Search for items in Things.
-
-**Parameters:**
-- `query` (optional): Search query
-
-### `json_import`
-Advanced JSON import for bulk operations.
-
-**Parameters:**
-- `data` (required): Array of items to import (to-dos and projects)
-- `reveal` (optional): Whether to reveal imported items
-
-## Running the Server
-
-### Development
-```bash
-npm run dev
-```
-
-### Production
-```bash
-npm start
-```
-
-### With MCP Inspector (for testing)
-```bash
-npm run inspector
-```
-
-## Testing
-
-```bash
-npm test
-```
-
-## Project Structure
-
-```
-things-mcp/
-├── src/
-│   ├── index.ts              # Main server entry point
-│   ├── tools/                # Tool implementations
-│   │   ├── add-todo.ts
-│   │   ├── add-project.ts
-│   │   ├── update-todo.ts
-│   │   ├── update-project.ts
-│   │   ├── show.ts
-│   │   ├── search.ts
-│   │   └── json-import.ts
-│   ├── utils/                # Utility functions
-│   │   ├── url-builder.ts    # Things URL construction
-│   │   ├── encoder.ts        # Parameter encoding
-│   │   ├── auth.ts           # Authentication handling
-│   │   └── logger.ts         # Logging utilities
-│   └── types/
-│       └── things.ts         # TypeScript type definitions
-├── tests/                    # Test files
-├── plans/                    # Architecture and planning docs
-└── build/                    # Compiled output
-```
-
-## Things URL Scheme
-
-This server uses the [Things URL Scheme](https://culturedcode.com/things/support/articles/2803573/) to interact with the Things app. All commands are executed by opening URLs with the `things://` scheme.
+### `export_json`
+Export your entire Things database for backup or analysis.
 
 ## Requirements
 
-- macOS (Things URL scheme only works on macOS)
-- Things.app installed
-- Node.js 20 or higher
-- TypeScript 5.0 or later
+- **macOS** (Things.app requirement)
+- **Things.app** installed and running
+- **Node.js** 20 or higher
+
+## Troubleshooting
+
+### "Things container not found"
+- Ensure Things.app is installed and has been launched at least once
+- Check that you're running on macOS
+
+### "Update operations require auth token"  
+- Follow the authorization token setup steps above
+- Verify the token is correctly set in your environment
+
+### MCP server not loading
+- Check your configuration file syntax
+- Verify the path to the built server file
+- Restart your AI assistant after configuration changes
 
 ## License
 
 MIT
+
+## Contributing
+
+Issues and pull requests welcome! Please ensure all tests pass before submitting.

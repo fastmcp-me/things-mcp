@@ -639,7 +639,7 @@ function generateMarkdownSummary(): string {
 }
 
 // Main execution
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   try {
     const outputFormat = process.argv[2]; // Check for command line argument
     

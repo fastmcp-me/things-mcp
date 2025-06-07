@@ -61,7 +61,7 @@ const addTodoSchema = z.object({
 export function registerAddTodoTool(server: McpServer): void {
   server.tool(
     'add_todo',
-    'Create a new to-do item in Things.app with comprehensive options for scheduling, organization, and project assignment. Supports adding notes, tags, checklist items, and organizing within projects or areas. Opens Things.app immediately to add the item.',
+    'Create a new to-do item in Things.app. Add notes, tags, checklist items, and assign to projects or areas.',
     addTodoSchema.shape,
     async (params) => {
       try {

@@ -71,31 +71,30 @@ Each tool follows a consistent pattern in `src/tools/`:
 - Use `import` statements, never `require()`
 
 ### Tool Categories
-1. **Creation Tools** (`add_todo`, `add_project`): No auth required, use URL scheme with comprehensive JSON schemas
-   - Direct parameter structure with detailed validation and descriptions
+1. **Creation Tools** (`add_todo`, `add_project`): No auth required, use URL scheme with JSON schemas
+   - Direct parameter structure with validation and descriptions
    - Array fields (tags, checklist-items, initial-todos) converted to comma-separated strings for URL scheme
    - Field validation with max lengths, regex patterns, and enum constraints
-   - Clear parameter descriptions with examples and use cases
-2. **Update Tools** (`update_todo`, `update_project`): Require auth token, use URL scheme with comprehensive JSON schemas
+2. **Update Tools** (`update_todo`, `update_project`): Require auth token, use URL scheme with JSON schemas
    - Direct parameter structure with ID and update fields
    - Array fields (tags, checklist-items) converted to comma-separated strings for URL scheme
    - Support for append/prepend operations on notes and checklist items
    - Field validation with max lengths, regex patterns, and enum constraints
-3. **Summary Tool** (`things_summary`): **Primary data access tool** - Direct database access for comprehensive overview
-   - Replaces all individual list tools with a single powerful summary generator
-   - Returns formatted Markdown for human reading or structured JSON for processing
+3. **Summary Tool** (`things_summary`): Primary data access tool - Direct database access
+   - Returns formatted Markdown or structured JSON for tasks, projects, areas, and tags
    - Advanced filtering by areas, tags, projects, date ranges, and completion status
-   - Direct SQLite database access for complete and accurate data retrieval
-4. **Export Tool** (`export_json`): **Advanced debugging/backup tool** - Complete database export
+   - Direct SQLite database access with proper bit-packed date conversion
+4. **Export Tool** (`export_json`): Database export tool
    - Exports entire Things database as structured JSON for debugging, backup, or data processing
    - Includes all relationships, metadata, and raw database structures
    - Options for including completed/trashed items and minimal vs. full data export
 
 ### Testing Strategy
-- Unit tests for URL building and encoding logic
-- Integration tests for tool registration
+- Unit tests for URL building and encoding logic (`url-builder.test.ts`)
+- Integration tests for tool registration (`server.test.ts`)
+- Full integration tests for Things URL scheme operations (`integration.test.ts`)
+- Platform detection - tests skip on non-macOS systems
 - ES module compatibility with Jest requires specific configuration
-- Mock macOS-specific functionality when needed
 
 ### macOS Integration
 - Only works on macOS (Things.app requirement)
@@ -106,8 +105,12 @@ Each tool follows a consistent pattern in `src/tools/`:
 
 ### Tool Descriptions
 All tools follow MCP best practices with:
-- Action-oriented descriptions starting with verbs
-- Clear parameter explanations with examples
+- Direct, action-oriented descriptions
+- Clear parameter explanations
 - Specific format requirements (ISO dates, array values)
-- Default value documentation
 - JSON schema compliance for all creation and update operations
+
+### Date Handling
+- **Creation Date**: Unix epoch format (seconds since 1970)
+- **Start Date/Deadline**: Things bit-packed format requiring bitwise extraction
+- Uses Things.py approach for proper date conversion with year/month/day masks

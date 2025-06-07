@@ -235,7 +235,7 @@ function exportThingsData(params: any): any {
 export function registerExportJsonTool(server: McpServer): void {
   server.tool(
     'export_json',
-    'Export complete Things database as structured JSON for debugging, backup, or data processing. **Advanced tool** - provides raw database export with all relationships and metadata. Use things_summary for regular data access. Requires direct database access permissions.',
+    'Export complete Things database as structured JSON for debugging, backup, or data processing.',
     exportJsonSchema.shape,
     async (params) => {
       try {

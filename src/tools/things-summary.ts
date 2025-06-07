@@ -447,7 +447,7 @@ function generateMarkdownSummary(data: ThingsSummary): string {
   lines.push('');
   
   // Overview Statistics
-  lines.push('## 📊 Overview');
+  lines.push('## Overview');
   lines.push('');
   lines.push(`- **Open Tasks:** ${data.summary.totalOpenTasks}`);
   lines.push(`- **Active Projects:** ${data.summary.totalActiveProjects}`);
@@ -457,29 +457,29 @@ function generateMarkdownSummary(data: ThingsSummary): string {
   
   // Today Tasks (high priority section)
   if (data.todayTasks && data.todayTasks.length > 0) {
-    lines.push('## 🎯 Today');
+    lines.push('## Today');
     lines.push('');
     
     data.todayTasks.forEach(task => {
       let taskLine = `- [ ] **${task.title}**`;
-      if (task.deadline) taskLine += ` 🔴 (due: ${task.deadline})`;
+      if (task.deadline) taskLine += ` (due: ${task.deadline})`;
       lines.push(taskLine);
       lines.push(`  - *ID: ${task.id}*`);
       
       if (task.notes) {
-        lines.push(`  - 📝 ${task.notes}`);
+        lines.push(`  - ${task.notes}`);
       }
       if (task.area) {
-        lines.push(`  - 📁 Area: ${task.area.name}`);
+        lines.push(`  - Area: ${task.area.name}`);
       }
       if (task.project) {
-        lines.push(`  - 📂 Project: ${task.project.name}`);
+        lines.push(`  - Project: ${task.project.name}`);
       }
       if (task.tags && task.tags.length > 0) {
-        lines.push(`  - 🏷️ Tags: ${task.tags.map(t => `#${t.name}`).join(', ')}`);
+        lines.push(`  - Tags: ${task.tags.map(t => `#${t.name}`).join(', ')}`);
       }
       if (task.checklistItems && task.checklistItems.total > 0) {
-        lines.push(`  - ✅ Checklist: ${task.checklistItems.open}/${task.checklistItems.total} remaining`);
+        lines.push(`  - Checklist: ${task.checklistItems.open}/${task.checklistItems.total} remaining`);
       }
     });
     lines.push('');
@@ -487,24 +487,24 @@ function generateMarkdownSummary(data: ThingsSummary): string {
   
   // Inbox Tasks
   if (data.inboxTasks && data.inboxTasks.length > 0) {
-    lines.push('## 📥 Inbox');
+    lines.push('## Inbox');
     lines.push('');
     
     data.inboxTasks.forEach(task => {
       let taskLine = `- [ ] **${task.title}**`;
-      if (task.startDate) taskLine += ` 📅 (scheduled: ${task.startDate})`;
-      if (task.deadline) taskLine += ` 🔴 (due: ${task.deadline})`;
+      if (task.startDate) taskLine += ` (scheduled: ${task.startDate})`;
+      if (task.deadline) taskLine += ` (due: ${task.deadline})`;
       lines.push(taskLine);
       lines.push(`  - *ID: ${task.id}*`);
       
       if (task.notes) {
-        lines.push(`  - 📝 ${task.notes}`);
+        lines.push(`  - ${task.notes}`);
       }
       if (task.tags && task.tags.length > 0) {
-        lines.push(`  - 🏷️ Tags: ${task.tags.map(t => `#${t.name}`).join(', ')}`);
+        lines.push(`  - Tags: ${task.tags.map(t => `#${t.name}`).join(', ')}`);
       }
       if (task.checklistItems && task.checklistItems.total > 0) {
-        lines.push(`  - ✅ Checklist: ${task.checklistItems.open}/${task.checklistItems.total} remaining`);
+        lines.push(`  - Checklist: ${task.checklistItems.open}/${task.checklistItems.total} remaining`);
       }
     });
     lines.push('');
@@ -512,7 +512,7 @@ function generateMarkdownSummary(data: ThingsSummary): string {
   
   // Areas
   if (data.areas && data.areas.length > 0) {
-    lines.push('## 📁 Areas');
+    lines.push('## Areas');
     lines.push('');
     
     data.areas.forEach(area => {
@@ -525,21 +525,21 @@ function generateMarkdownSummary(data: ThingsSummary): string {
       
       // Area projects
       if (area.projects && area.projects.length > 0) {
-        lines.push('**📂 Projects:**');
+        lines.push('**Projects:**');
         area.projects.forEach(project => {
           lines.push(`- [ ] **${project.title}**`);
           lines.push(`  - *ID: ${project.id}*`);
           if (project.notes) {
-            lines.push(`  - 📝 ${project.notes}`);
+            lines.push(`  - ${project.notes}`);
           }
           if (project.startDate) {
-            lines.push(`  - 📅 Scheduled: ${project.startDate}`);
+            lines.push(`  - Scheduled: ${project.startDate}`);
           }
           if (project.deadline) {
-            lines.push(`  - 🔴 Due: ${project.deadline}`);
+            lines.push(`  - Due: ${project.deadline}`);
           }
           if (project.tags && project.tags.length > 0) {
-            lines.push(`  - 🏷️ Tags: ${project.tags.map(t => `#${t.name}`).join(', ')}`);
+            lines.push(`  - Tags: ${project.tags.map(t => `#${t.name}`).join(', ')}`);
           }
           
           // Project tasks
@@ -547,18 +547,18 @@ function generateMarkdownSummary(data: ThingsSummary): string {
             lines.push('  - **Tasks:**');
             project.tasks.forEach(task => {
               let taskLine = `    - [ ] ${task.title}`;
-              if (task.startDate) taskLine += ` 📅 (${task.startDate})`;
-              if (task.deadline) taskLine += ` 🔴 (due: ${task.deadline})`;
+              if (task.startDate) taskLine += ` (${task.startDate})`;
+              if (task.deadline) taskLine += ` (due: ${task.deadline})`;
               lines.push(taskLine);
               
               if (task.notes) {
-                lines.push(`      - 📝 ${task.notes}`);
+                lines.push(`      - ${task.notes}`);
               }
               if (task.tags && task.tags.length > 0) {
-                lines.push(`      - 🏷️ ${task.tags.map(t => `#${t.name}`).join(', ')}`);
+                lines.push(`      - ${task.tags.map(t => `#${t.name}`).join(', ')}`);
               }
               if (task.checklistItems && task.checklistItems.total > 0) {
-                lines.push(`      - ✅ ${task.checklistItems.open}/${task.checklistItems.total} remaining`);
+                lines.push(`      - ${task.checklistItems.open}/${task.checklistItems.total} remaining`);
               }
             });
           }
@@ -568,21 +568,21 @@ function generateMarkdownSummary(data: ThingsSummary): string {
       
       // Area tasks
       if (area.tasks && area.tasks.length > 0) {
-        lines.push('**📋 Tasks:**');
+        lines.push('**Tasks:**');
         area.tasks.forEach(task => {
           let taskLine = `- [ ] ${task.title}`;
-          if (task.startDate) taskLine += ` 📅 (${task.startDate})`;
-          if (task.deadline) taskLine += ` 🔴 (due: ${task.deadline})`;
+          if (task.startDate) taskLine += ` (${task.startDate})`;
+          if (task.deadline) taskLine += ` (due: ${task.deadline})`;
           lines.push(taskLine);
           
           if (task.notes) {
-            lines.push(`  - 📝 ${task.notes}`);
+            lines.push(`  - ${task.notes}`);
           }
           if (task.tags && task.tags.length > 0) {
-            lines.push(`  - 🏷️ Tags: ${task.tags.map(t => `#${t.name}`).join(', ')}`);
+            lines.push(`  - Tags: ${task.tags.map(t => `#${t.name}`).join(', ')}`);
           }
           if (task.checklistItems && task.checklistItems.total > 0) {
-            lines.push(`  - ✅ Checklist: ${task.checklistItems.open}/${task.checklistItems.total} remaining`);
+            lines.push(`  - Checklist: ${task.checklistItems.open}/${task.checklistItems.total} remaining`);
           }
         });
         lines.push('');
@@ -594,44 +594,44 @@ function generateMarkdownSummary(data: ThingsSummary): string {
   if (data.projects && data.projects.length > 0) {
     const standaloneProjects = data.projects.filter(p => !p.area);
     if (standaloneProjects.length > 0) {
-      lines.push('## 📂 Projects');
+      lines.push('## Projects');
       lines.push('');
       
       standaloneProjects.forEach(project => {
         lines.push(`### ${project.title}`);
         lines.push(`*ID: ${project.id}*`);
         if (project.notes) {
-          lines.push(`📝 ${project.notes}`);
+          lines.push(`${project.notes}`);
         }
         
         if (project.startDate) {
-          lines.push(`📅 **Start:** ${project.startDate}`);
+          lines.push(`**Start:** ${project.startDate}`);
         }
         if (project.deadline) {
-          lines.push(`🔴 **Due:** ${project.deadline}`);
+          lines.push(`**Due:** ${project.deadline}`);
         }
         if (project.tags && project.tags.length > 0) {
-          lines.push(`🏷️ **Tags:** ${project.tags.map(t => `#${t.name}`).join(', ')}`);
+          lines.push(`**Tags:** ${project.tags.map(t => `#${t.name}`).join(', ')}`);
         }
         lines.push('');
         
         // Project tasks
         if (project.tasks && project.tasks.length > 0) {
-          lines.push('**📋 Tasks:**');
+          lines.push('**Tasks:**');
           project.tasks.forEach(task => {
             let taskLine = `- [ ] ${task.title}`;
-            if (task.startDate) taskLine += ` 📅 (${task.startDate})`;
-            if (task.deadline) taskLine += ` 🔴 (due: ${task.deadline})`;
+            if (task.startDate) taskLine += ` (${task.startDate})`;
+            if (task.deadline) taskLine += ` (due: ${task.deadline})`;
             lines.push(taskLine);
             
             if (task.notes) {
-              lines.push(`  - 📝 ${task.notes}`);
+              lines.push(`  - ${task.notes}`);
             }
             if (task.tags && task.tags.length > 0) {
-              lines.push(`  - 🏷️ ${task.tags.map(t => `#${t.name}`).join(', ')}`);
+              lines.push(`  - ${task.tags.map(t => `#${t.name}`).join(', ')}`);
             }
             if (task.checklistItems && task.checklistItems.total > 0) {
-              lines.push(`  - ✅ Checklist: ${task.checklistItems.open}/${task.checklistItems.total} remaining`);
+              lines.push(`  - Checklist: ${task.checklistItems.open}/${task.checklistItems.total} remaining`);
             }
           });
           lines.push('');
@@ -642,7 +642,7 @@ function generateMarkdownSummary(data: ThingsSummary): string {
   
   // Tags
   if (data.tags && data.tags.length > 0) {
-    lines.push('## 🏷️ Tags');
+    lines.push('## Tags');
     lines.push('');
     
     const sortedTags = [...data.tags].sort((a, b) => b.taskCount - a.taskCount);
@@ -659,18 +659,17 @@ function generateMarkdownSummary(data: ThingsSummary): string {
   }
   
   // Navigation URLs
-  lines.push('## 🔗 Quick Navigation');
+  lines.push('## Quick Navigation');
   lines.push('');
-  lines.push(`- [📅 Today](${data.urls.showToday})`);
-  lines.push(`- [📥 Inbox](${data.urls.showInbox})`);
-  lines.push(`- [📂 Projects](${data.urls.showProjects})`);
-  lines.push(`- [📁 Areas](${data.urls.showAreas})`);
+  lines.push(`- [Today](${data.urls.showToday})`);
+  lines.push(`- [Inbox](${data.urls.showInbox})`);
+  lines.push(`- [Projects](${data.urls.showProjects})`);
+  lines.push(`- [Areas](${data.urls.showAreas})`);
   lines.push('');
   
   // Footer
   lines.push('---');
   lines.push('');
-  lines.push('*Generated by Things MCP Server - Direct database access for comprehensive overview*');
   
   return lines.join('\n');
 }
@@ -678,7 +677,7 @@ function generateMarkdownSummary(data: ThingsSummary): string {
 export function registerThingsSummaryTool(server: McpServer): void {
   server.tool(
     'things_summary',
-    'Generate a comprehensive summary of your Things database with powerful filtering options. **This is the primary tool for accessing all your Things data** - it replaces individual list tools and provides a complete overview of tasks, projects, areas, and tags. Returns either formatted Markdown for easy reading or structured JSON for further processing. Direct database access ensures complete and accurate data.',
+    'Generate a summary of your Things database with filtering options. Returns formatted Markdown or structured JSON data for tasks, projects, areas, and tags.',
     summarySchema.shape,
     async (params) => {
       try {

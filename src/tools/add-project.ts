@@ -49,7 +49,7 @@ const addProjectSchema = z.object({
 export function registerAddProjectTool(server: McpServer): void {
   server.tool(
     'add_project',
-    'Create a new project in Things.app with comprehensive options for scheduling, organization, and initial task planning. Projects help organize related to-dos and can contain multiple tasks, deadlines, and notes. Supports adding to specific areas and pre-populating with initial to-dos.',
+    'Create a new project in Things.app. Add notes, tags, assign to areas, and pre-populate with initial to-dos.',
     addProjectSchema.shape,
     async (params) => {
       try {
