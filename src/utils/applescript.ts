@@ -74,46 +74,65 @@ export async function listTodos(options: ListOptions = {}): Promise<ThingsTodo[]
   let script = `
     tell application "Things3"
       set todoList to every to do
-      set todoData to {}
+      set todoData to ""
       
       repeat with todo in todoList
-        set todoInfo to {id:(id of todo), name:(name of todo), notes:(notes of todo), status:(status of todo), creationDate:(creation date of todo), modificationDate:(modification date of todo)}
-        
+        set todoId to id of todo
+        set todoName to name of todo
+        set todoNotes to ""
         try
-          set todoInfo to todoInfo & {project:(name of project of todo)}
-        on error
-          set todoInfo to todoInfo & {project:""}
+          set todoNotes to notes of todo
+        end try
+        set todoStatus to status of todo as string
+        set todoCreationDate to creation date of todo as string
+        set todoModificationDate to modification date of todo as string
+        
+        set todoProject to ""
+        try
+          set todoProject to name of project of todo
         end try
         
+        set todoArea to ""
         try
-          set todoInfo to todoInfo & {area:(name of area of todo)}
-        on error
-          set todoInfo to todoInfo & {area:""}
+          set todoArea to name of area of todo
         end try
         
+        set todoDueDate to ""
         try
-          set todoInfo to todoInfo & {dueDate:(due date of todo)}
-        on error
-          set todoInfo to todoInfo & {dueDate:""}
+          set dueDate to due date of todo
+          if dueDate is not missing value then
+            set todoDueDate to dueDate as string
+          end if
         end try
         
+        set todoCompletionDate to ""
         try
-          set todoInfo to todoInfo & {completionDate:(completion date of todo)}
-        on error
-          set todoInfo to todoInfo & {completionDate:""}
+          set completionDate to completion date of todo
+          if completionDate is not missing value then
+            set todoCompletionDate to completionDate as string
+          end if
         end try
         
+        set todoTags to ""
         try
-          set tagNames to {}
-          repeat with tag in (tags of todo)
-            set tagNames to tagNames & (name of tag)
+          set tagList to tags of todo
+          repeat with i from 1 to count of tagList
+            set tagName to name of item i of tagList
+            if todoTags is "" then
+              set todoTags to tagName
+            else
+              set todoTags to todoTags & "," & tagName
+            end if
           end repeat
-          set todoInfo to todoInfo & {tags:tagNames}
-        on error
-          set todoInfo to todoInfo & {tags:{}}
         end try
         
-        set todoData to todoData & {todoInfo}
+        set todoEntry to todoId & "|" & todoName & "|" & todoNotes & "|" & todoStatus & "|" & todoProject & "|" & todoArea & "|" & todoDueDate & "|" & todoCompletionDate & "|" & todoTags & "|" & todoCreationDate & "|" & todoModificationDate
+        
+        if todoData is "" then
+          set todoData to todoEntry
+        else
+          set todoData to todoData & "\n" & todoEntry
+        end if
       end repeat
       
       return todoData
@@ -133,40 +152,60 @@ export async function listProjects(options: ListOptions = {}): Promise<ThingsPro
   let script = `
     tell application "Things3"
       set projectList to every project
-      set projectData to {}
+      set projectData to ""
       
       repeat with proj in projectList
-        set projectInfo to {id:(id of proj), name:(name of proj), notes:(notes of proj), status:(status of proj), creationDate:(creation date of proj), modificationDate:(modification date of proj)}
-        
+        set projId to id of proj
+        set projName to name of proj
+        set projNotes to ""
         try
-          set projectInfo to projectInfo & {area:(name of area of proj)}
-        on error
-          set projectInfo to projectInfo & {area:""}
+          set projNotes to notes of proj
+        end try
+        set projStatus to status of proj as string
+        set projCreationDate to creation date of proj as string
+        set projModificationDate to modification date of proj as string
+        
+        set projArea to ""
+        try
+          set projArea to name of area of proj
         end try
         
+        set projDueDate to ""
         try
-          set projectInfo to projectInfo & {dueDate:(due date of proj)}
-        on error
-          set projectInfo to projectInfo & {dueDate:""}
+          set dueDate to due date of proj
+          if dueDate is not missing value then
+            set projDueDate to dueDate as string
+          end if
         end try
         
+        set projCompletionDate to ""
         try
-          set projectInfo to projectInfo & {completionDate:(completion date of proj)}
-        on error
-          set projectInfo to projectInfo & {completionDate:""}
+          set completionDate to completion date of proj
+          if completionDate is not missing value then
+            set projCompletionDate to completionDate as string
+          end if
         end try
         
+        set projTags to ""
         try
-          set tagNames to {}
-          repeat with tag in (tags of proj)
-            set tagNames to tagNames & (name of tag)
+          set tagList to tags of proj
+          repeat with i from 1 to count of tagList
+            set tagName to name of item i of tagList
+            if projTags is "" then
+              set projTags to tagName
+            else
+              set projTags to projTags & "," & tagName
+            end if
           end repeat
-          set projectInfo to projectInfo & {tags:tagNames}
-        on error
-          set projectInfo to projectInfo & {tags:{}}
         end try
         
-        set projectData to projectData & {projectInfo}
+        set projEntry to projId & "|" & projName & "|" & projNotes & "|" & projStatus & "|" & projArea & "|" & projDueDate & "|" & projCompletionDate & "|" & projTags & "|" & projCreationDate & "|" & projModificationDate
+        
+        if projectData is "" then
+          set projectData to projEntry
+        else
+          set projectData to projectData & "\n" & projEntry
+        end if
       end repeat
       
       return projectData
@@ -186,22 +225,33 @@ export async function listAreas(): Promise<ThingsArea[]> {
   const script = `
     tell application "Things3"
       set areaList to every area
-      set areaData to {}
+      set areaData to ""
       
-      repeat with area in areaList
-        set areaInfo to {id:(id of area), name:(name of area)}
+      repeat with i from 1 to count of areaList
+        set currentArea to item i of areaList
+        set areaId to id of currentArea
+        set areaName to name of currentArea
         
+        set areaTags to ""
         try
-          set tagNames to {}
-          repeat with tag in (tags of area)
-            set tagNames to tagNames & (name of tag)
+          set tagList to tags of currentArea
+          repeat with j from 1 to count of tagList
+            set tagName to name of item j of tagList
+            if areaTags is "" then
+              set areaTags to tagName
+            else
+              set areaTags to areaTags & "," & tagName
+            end if
           end repeat
-          set areaInfo to areaInfo & {tags:tagNames}
-        on error
-          set areaInfo to areaInfo & {tags:{}}
         end try
         
-        set areaData to areaData & {areaInfo}
+        set areaEntry to areaId & "|" & areaName & "|" & areaTags
+        
+        if areaData is "" then
+          set areaData to areaEntry
+        else
+          set areaData to areaData & "\n" & areaEntry
+        end if
       end repeat
       
       return areaData
@@ -216,11 +266,20 @@ export async function listTags(): Promise<ThingsTag[]> {
   const script = `
     tell application "Things3"
       set tagList to every tag
-      set tagData to {}
+      set tagData to ""
       
-      repeat with tag in tagList
-        set tagInfo to {id:(id of tag), name:(name of tag)}
-        set tagData to tagData & {tagInfo}
+      repeat with i from 1 to count of tagList
+        set currentTag to item i of tagList
+        set tagId to id of currentTag
+        set tagName to name of currentTag
+        
+        set tagEntry to tagId & "|" & tagName
+        
+        if tagData is "" then
+          set tagData to tagEntry
+        else
+          set tagData to tagData & "\n" & tagEntry
+        end if
       end repeat
       
       return tagData
@@ -255,26 +314,123 @@ export async function deleteProject(id: string): Promise<void> {
 
 // Helper functions to parse AppleScript output
 function parseAppleScriptTodoList(output: string): ThingsTodo[] {
-  // AppleScript output parsing is complex - for now return empty array
-  // In practice, would need to handle AppleScript's record format
-  logger.warn('Todo list parsing not yet implemented', { output });
-  return [];
+  if (!output || output.trim() === '') {
+    return [];
+  }
+  
+  try {
+    const entries = output.split('\n').filter(line => line.trim() !== '');
+    return entries.map(entry => {
+      const parts = entry.split('|');
+      if (parts.length < 11) {
+        throw new Error(`Invalid entry format: ${entry}`);
+      }
+      
+      const [id, name, notes, status, project, area, dueDate, completionDate, tags, creationDate, modificationDate] = parts;
+      
+      return {
+        id,
+        name,
+        notes: notes || undefined,
+        project: project || undefined,
+        area: area || undefined,
+        tags: tags ? tags.split(',').filter(Boolean) : [],
+        completionDate: completionDate && completionDate !== '' ? new Date(completionDate) : undefined,
+        dueDate: dueDate && dueDate !== '' ? new Date(dueDate) : undefined,
+        status: status as 'open' | 'completed' | 'canceled',
+        creationDate: creationDate && creationDate !== '' ? new Date(creationDate) : new Date(),
+        modificationDate: modificationDate && modificationDate !== '' ? new Date(modificationDate) : new Date()
+      };
+    });
+  } catch (error) {
+    logger.error('Failed to parse todo list output', { output, error });
+    return [];
+  }
 }
 
 function parseAppleScriptProjectList(output: string): ThingsProject[] {
-  // AppleScript output parsing is complex - for now return empty array
-  logger.warn('Project list parsing not yet implemented', { output });
-  return [];
+  if (!output || output.trim() === '') {
+    return [];
+  }
+  
+  try {
+    const entries = output.split('\n').filter(line => line.trim() !== '');
+    return entries.map(entry => {
+      const parts = entry.split('|');
+      if (parts.length < 10) {
+        throw new Error(`Invalid entry format: ${entry}`);
+      }
+      
+      const [id, name, notes, status, area, dueDate, completionDate, tags, creationDate, modificationDate] = parts;
+      
+      return {
+        id,
+        name,
+        notes: notes || undefined,
+        area: area || undefined,
+        tags: tags ? tags.split(',').filter(Boolean) : [],
+        completionDate: completionDate && completionDate !== '' ? new Date(completionDate) : undefined,
+        dueDate: dueDate && dueDate !== '' ? new Date(dueDate) : undefined,
+        status: status as 'open' | 'completed' | 'canceled',
+        creationDate: creationDate && creationDate !== '' ? new Date(creationDate) : new Date(),
+        modificationDate: modificationDate && modificationDate !== '' ? new Date(modificationDate) : new Date()
+      };
+    });
+  } catch (error) {
+    logger.error('Failed to parse project list output', { output, error });
+    return [];
+  }
 }
 
 function parseAppleScriptAreaList(output: string): ThingsArea[] {
-  // AppleScript output parsing is complex - for now return empty array
-  logger.warn('Area list parsing not yet implemented', { output });
-  return [];
+  if (!output || output.trim() === '') {
+    return [];
+  }
+  
+  try {
+    const entries = output.split('\n').filter(line => line.trim() !== '');
+    return entries.map(entry => {
+      const parts = entry.split('|');
+      if (parts.length < 3) {
+        throw new Error(`Invalid area entry format: ${entry}`);
+      }
+      
+      const [id, name, tags] = parts;
+      
+      return {
+        id,
+        name,
+        tags: tags ? tags.split(',').filter(Boolean) : []
+      };
+    });
+  } catch (error) {
+    logger.error('Failed to parse area list output', { output, error });
+    return [];
+  }
 }
 
 function parseAppleScriptTagList(output: string): ThingsTag[] {
-  // AppleScript output parsing is complex - for now return empty array
-  logger.warn('Tag list parsing not yet implemented', { output });
-  return [];
+  if (!output || output.trim() === '') {
+    return [];
+  }
+  
+  try {
+    const entries = output.split('\n').filter(line => line.trim() !== '');
+    return entries.map(entry => {
+      const parts = entry.split('|');
+      if (parts.length < 2) {
+        throw new Error(`Invalid tag entry format: ${entry}`);
+      }
+      
+      const [id, name] = parts;
+      
+      return {
+        id,
+        name
+      };
+    });
+  } catch (error) {
+    logger.error('Failed to parse tag list output', { output, error });
+    return [];
+  }
 }
