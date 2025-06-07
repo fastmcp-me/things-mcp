@@ -9,10 +9,8 @@ import { registerAddTodoTool } from './tools/add-todo.js';
 import { registerAddProjectTool } from './tools/add-project.js';
 import { registerUpdateTodoTool } from './tools/update-todo.js';
 import { registerUpdateProjectTool } from './tools/update-project.js';
-import { registerListTodosTool } from './tools/list-todos.js';
-import { registerListProjectsTool } from './tools/list-projects.js';
-import { registerListAreasTool } from './tools/list-areas.js';
-import { registerListTagsTool } from './tools/list-tags.js';
+import { registerThingsSummaryTool } from './tools/things-summary.js';
+import { registerExportJsonTool } from './tools/export-json.js';
 
 const server = new McpServer({
   name: 'things-mcp',
@@ -24,10 +22,8 @@ registerAddTodoTool(server);
 registerAddProjectTool(server);
 registerUpdateTodoTool(server);
 registerUpdateProjectTool(server);
-registerListTodosTool(server);
-registerListProjectsTool(server);
-registerListAreasTool(server);
-registerListTagsTool(server);
+registerThingsSummaryTool(server);
+registerExportJsonTool(server);
 
 // Add a resource that provides information about the server
 server.resource(
@@ -44,13 +40,11 @@ server.resource(
         authTokenRequired: !!process.env.THINGS_AUTH_TOKEN,
         availableTools: [
           'add_todo',
-          'add_project',
+          'add_project', 
           'update_todo',
           'update_project',
-          'list_todos',
-          'list_projects',
-          'list_areas',
-          'list_tags',
+          'things_summary',
+          'export_json',
         ]
       }, null, 2)
     }]
@@ -76,7 +70,7 @@ async function main(): Promise<void> {
     logger.info('Things MCP server started successfully', {
       platform: process.platform,
       hasAuthToken,
-      toolCount: 8
+      toolCount: 6
     });
   } catch (error) {
     logger.error('Failed to start server', { error: error instanceof Error ? error.message : error });

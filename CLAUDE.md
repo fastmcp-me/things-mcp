@@ -67,16 +67,25 @@ Each tool follows a consistent pattern in `src/tools/`:
 - Use `import` statements, never `require()`
 
 ### Tool Categories
-1. **Creation Tools** (`add_todo`, `add_project`): No auth required, use URL scheme with JSON schema structure
-   - Parameters structured as `{attributes: {...}}` format
-   - Attributes include array fields (tags, checklist-items, items) converted to comma-separated strings
-   - Field validation with max lengths and enum constraints
-2. **Update Tools** (`update_todo`, `update_project`): Require auth token, use URL scheme with JSON schema structure
-   - Parameters structured as `{id: string, attributes: {...}}` format
-   - Attributes include array fields (tags, checklist-items) converted to comma-separated strings
+1. **Creation Tools** (`add_todo`, `add_project`): No auth required, use URL scheme with comprehensive JSON schemas
+   - Direct parameter structure with detailed validation and descriptions
+   - Array fields (tags, checklist-items, initial-todos) converted to comma-separated strings for URL scheme
+   - Field validation with max lengths, regex patterns, and enum constraints
+   - Clear parameter descriptions with examples and use cases
+2. **Update Tools** (`update_todo`, `update_project`): Require auth token, use URL scheme with comprehensive JSON schemas
+   - Direct parameter structure with ID and update fields
+   - Array fields (tags, checklist-items) converted to comma-separated strings for URL scheme
    - Support for append/prepend operations on notes and checklist items
-   - Field validation with max lengths and enum constraints
-3. **Read Tools** (`list_todos`, `list_projects`, `list_areas`, `list_tags`): Use AppleScript for data access
+   - Field validation with max lengths, regex patterns, and enum constraints
+3. **Summary Tool** (`things_summary`): **Primary data access tool** - Direct database access for comprehensive overview
+   - Replaces all individual list tools with a single powerful summary generator
+   - Returns formatted Markdown for human reading or structured JSON for processing
+   - Advanced filtering by areas, tags, projects, date ranges, and completion status
+   - Direct SQLite database access for complete and accurate data retrieval
+4. **Export Tool** (`export_json`): **Advanced debugging/backup tool** - Complete database export
+   - Exports entire Things database as structured JSON for debugging, backup, or data processing
+   - Includes all relationships, metadata, and raw database structures
+   - Options for including completed/trashed items and minimal vs. full data export
 
 ### Testing Strategy
 - Unit tests for URL building and encoding logic
@@ -87,9 +96,9 @@ Each tool follows a consistent pattern in `src/tools/`:
 ### macOS Integration
 - Only works on macOS (Things.app requirement)
 - Uses `child_process.exec` with `open` command for URL schemes
-- Uses `osascript` command for AppleScript execution
+- Uses `sqlite3` command for direct database access in summary tool
 - Validates `process.platform === 'darwin'`
-- URL scheme for create/update operations, AppleScript for read operations
+- URL scheme for create/update operations, direct database access for comprehensive summaries
 
 ### Tool Descriptions
 All tools follow MCP best practices with:
