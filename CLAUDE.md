@@ -43,7 +43,7 @@ Each tool follows a consistent pattern in `src/tools/`:
 **URL Construction (`src/utils/url-builder.ts`):**
 - `buildThingsUrl()`: Converts parameters to Things URL scheme
 - `openThingsUrl()`: Executes URLs via macOS `open` command (async/await)
-- Uses `URLSearchParams` for proper encoding (creates `+` for spaces, not `%20`)
+- Uses `encodeURIComponent()` for proper percent encoding (spaces become `%20`)
 
 **Authentication (`src/utils/auth.ts`):**
 - Update operations require `THINGS_AUTH_TOKEN` environment variable
@@ -52,8 +52,14 @@ Each tool follows a consistent pattern in `src/tools/`:
 
 **Type System (`src/types/things.ts`):**
 - Complete TypeScript definitions for Things URL scheme parameters
-- Supports all Things commands: add, add-project, update, update-project, show, search, json
-- Includes union types for schedule values (`WhenValue`) and show targets
+- Supports core Things commands: add, add-project, update, update-project
+- Includes union types for schedule values (`WhenValue`) and parameter types
+
+**AppleScript Integration (`src/utils/applescript.ts`):**
+- `executeAppleScript()`: Executes AppleScript commands via `osascript`
+- Data access functions: `listTodos()`, `listProjects()`, `listAreas()`, `listTags()`
+- Delete functions: `deleteTodo()`, `deleteProject()`
+- Filtering support for status, dates, projects, areas, and tags
 
 ### ES Module Configuration
 - **Important**: Project uses ES modules (`"type": "module"` in package.json)
@@ -62,10 +68,10 @@ Each tool follows a consistent pattern in `src/tools/`:
 - Use `import` statements, never `require()`
 
 ### Tool Categories
-1. **Creation Tools** (`add_todo`, `add_project`): No auth required
-2. **Update Tools** (`update_todo`, `update_project`): Require auth token
-3. **Navigation Tools** (`show`, `search`): No auth required  
-4. **Bulk Tools** (`json_import`): No auth required, accepts complex JSON structures
+1. **Creation Tools** (`add_todo`, `add_project`): No auth required, use URL scheme
+2. **Update Tools** (`update_todo`, `update_project`): Require auth token, use URL scheme
+3. **Read Tools** (`list_todos`, `list_projects`, `list_areas`, `list_tags`): Use AppleScript for data access
+4. **Removal Tools** (`remove_todo`, `remove_project`): Use AppleScript, destructive operations with warnings
 
 ### Testing Strategy
 - Unit tests for URL building and encoding logic
@@ -75,6 +81,15 @@ Each tool follows a consistent pattern in `src/tools/`:
 
 ### macOS Integration
 - Only works on macOS (Things.app requirement)
-- Uses `child_process.exec` with `open` command
+- Uses `child_process.exec` with `open` command for URL schemes
+- Uses `osascript` command for AppleScript execution
 - Validates `process.platform === 'darwin'`
-- Things URL scheme handles all actual data manipulation
+- URL scheme for create/update operations, AppleScript for read/delete operations
+
+### Tool Descriptions
+All tools follow MCP best practices with:
+- Action-oriented descriptions starting with verbs
+- Clear parameter explanations with examples
+- Safety warnings for destructive operations
+- Specific format requirements (ISO dates, comma-separated values)
+- Default value documentation
