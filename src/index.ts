@@ -13,8 +13,6 @@ import { registerListTodosTool } from './tools/list-todos.js';
 import { registerListProjectsTool } from './tools/list-projects.js';
 import { registerListAreasTool } from './tools/list-areas.js';
 import { registerListTagsTool } from './tools/list-tags.js';
-import { registerRemoveTodoTool } from './tools/remove-todo.js';
-import { registerRemoveProjectTool } from './tools/remove-project.js';
 
 const server = new McpServer({
   name: 'things-mcp',
@@ -30,8 +28,6 @@ registerListTodosTool(server);
 registerListProjectsTool(server);
 registerListAreasTool(server);
 registerListTagsTool(server);
-registerRemoveTodoTool(server);
-registerRemoveProjectTool(server);
 
 // Add a resource that provides information about the server
 server.resource(
@@ -55,8 +51,6 @@ server.resource(
           'list_projects',
           'list_areas',
           'list_tags',
-          'remove_todo',
-          'remove_project'
         ]
       }, null, 2)
     }]
@@ -82,7 +76,7 @@ async function main(): Promise<void> {
     logger.info('Things MCP server started successfully', {
       platform: process.platform,
       hasAuthToken,
-      toolCount: 10
+      toolCount: 8
     });
   } catch (error) {
     logger.error('Failed to start server', { error: error instanceof Error ? error.message : error });
