@@ -5,21 +5,22 @@ import { logger } from '../utils/logger.js';
 import { AddTodoParams } from '../types/things.js';
 
 const addTodoSchema = z.object({
-  title: z.string().describe('The title of the to-do'),
-  notes: z.string().optional().describe('Additional notes for the to-do'),
-  when: z.string().optional().describe('When to schedule the to-do (today, tomorrow, evening, anytime, someday, or ISO date)'),
-  deadline: z.string().optional().describe('Deadline for the to-do (ISO date format)'),
-  tags: z.string().optional().describe('Comma-separated list of tags'),
-  checklist_items: z.string().optional().describe('Newline-separated checklist items'),
-  list: z.string().optional().describe('ID or name of the project/area to add the to-do to'),
-  heading: z.string().optional().describe('Name of the heading within the project'),
-  completed: z.boolean().optional().describe('Whether the to-do should be marked as completed'),
-  canceled: z.boolean().optional().describe('Whether the to-do should be marked as canceled')
+  title: z.string().describe('To-do title (required). Clear, actionable description of the task'),
+  notes: z.string().optional().describe('Additional notes or details for the to-do. Supports markdown formatting'),
+  when: z.string().optional().describe('Schedule date. Use "today", "tomorrow", "evening", "anytime", "someday", or ISO date (YYYY-MM-DD)'),
+  deadline: z.string().optional().describe('Due date deadline in ISO format (YYYY-MM-DD). Creates deadline reminder in Things'),
+  tags: z.string().optional().describe('Comma-separated tags for organization (e.g., "work,urgent,email")'),
+  checklist_items: z.string().optional().describe('Sub-tasks as newline-separated items. Each line becomes a checklist item'),
+  list: z.string().optional().describe('Project or area name to add this to-do to. Creates relationship in Things hierarchy'),
+  heading: z.string().optional().describe('Heading name within the target project for organization'),
+  completed: z.boolean().optional().describe('Mark as completed immediately upon creation (default: false)'),
+  canceled: z.boolean().optional().describe('Mark as canceled immediately upon creation (default: false)')
 });
 
 export function registerAddTodoTool(server: McpServer): void {
   server.tool(
     'add_todo',
+    'Create a new to-do item in Things.app with optional scheduling, tags, and project assignment. Opens Things.app to add the item immediately.',
     addTodoSchema.shape,
     async (params) => {
       try {

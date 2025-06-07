@@ -7,22 +7,26 @@ const execAsync = promisify(exec);
 
 export function buildThingsUrl(command: ThingsCommand, params: Record<string, any>): string {
   const baseUrl = `things:///${command}`;
-  const queryParams = new URLSearchParams();
+  const queryParts: string[] = [];
   
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null && value !== '') {
+      let encodedValue: string;
+      
       if (key === 'data' && command === 'json') {
-        // JSON data needs to be stringified but not URL encoded (URLSearchParams will handle it)
-        queryParams.append(key, JSON.stringify(value));
+        // JSON data needs to be stringified and encoded
+        encodedValue = encodeURIComponent(JSON.stringify(value));
       } else {
-        // Let URLSearchParams handle the encoding
+        // Encode all values using proper percent encoding
         const stringValue = Array.isArray(value) ? value.join(',') : String(value);
-        queryParams.append(key, stringValue);
+        encodedValue = encodeURIComponent(stringValue);
       }
+      
+      queryParts.push(`${encodeURIComponent(key)}=${encodedValue}`);
     }
   }
   
-  const queryString = queryParams.toString();
+  const queryString = queryParts.join('&');
   return queryString ? `${baseUrl}?${queryString}` : baseUrl;
 }
 

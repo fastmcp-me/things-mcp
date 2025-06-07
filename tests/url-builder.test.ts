@@ -8,7 +8,7 @@ describe('URL Builder', () => {
       title: 'Test Todo'
     });
     
-    expect(url).toBe('things:///add?title=Test+Todo');
+    expect(url).toBe('things:///add?title=Test%20Todo');
   });
 
   it('should build URL with multiple parameters', () => {
@@ -19,8 +19,8 @@ describe('URL Builder', () => {
     });
     
     expect(url).toContain('things:///add');
-    expect(url).toContain('title=Test+Todo');
-    expect(url).toContain('notes=Some+notes');
+    expect(url).toContain('title=Test%20Todo');
+    expect(url).toContain('notes=Some%20notes');
     expect(url).toContain('when=today');
   });
 
@@ -32,7 +32,7 @@ describe('URL Builder', () => {
     });
     
     expect(url).not.toContain('notes');
-    expect(url).toContain('title=Test+Todo');
+    expect(url).toContain('title=Test%20Todo');
     expect(url).toContain('when=today');
   });
 

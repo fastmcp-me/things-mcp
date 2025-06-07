@@ -22,6 +22,7 @@ const updateProjectSchema = z.object({
 export function registerUpdateProjectTool(server: McpServer): void {
   server.tool(
     'update_project',
+    'Update an existing project in Things.app. Requires auth token. Can modify any property, move between areas, or change status.',
     updateProjectSchema.shape,
     async (params) => {
       try {

@@ -25,6 +25,7 @@ const updateTodoSchema = z.object({
 export function registerUpdateTodoTool(server: McpServer): void {
   server.tool(
     'update_todo',
+    'Update an existing to-do item in Things.app. Requires auth token. Can modify any property, move between projects, or change status.',
     updateTodoSchema.shape,
     async (params) => {
       try {

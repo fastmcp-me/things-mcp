@@ -2,8 +2,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { registerAddTodoTool } from '../src/tools/add-todo.js';
 import { registerAddProjectTool } from '../src/tools/add-project.js';
-import { registerShowTool } from '../src/tools/show.js';
-import { registerSearchTool } from '../src/tools/search.js';
+import { registerUpdateTodoTool } from '../src/tools/update-todo.js';
+import { registerUpdateProjectTool } from '../src/tools/update-project.js';
 
 describe('Things MCP Server', () => {
   let server: McpServer;
@@ -27,11 +27,11 @@ describe('Things MCP Server', () => {
     expect(() => registerAddProjectTool(server)).not.toThrow();
   });
 
-  it('should register show tool', () => {
-    expect(() => registerShowTool(server)).not.toThrow();
+  it('should register update todo tool', () => {
+    expect(() => registerUpdateTodoTool(server)).not.toThrow();
   });
 
-  it('should register search tool', () => {
-    expect(() => registerSearchTool(server)).not.toThrow();
+  it('should register update project tool', () => {
+    expect(() => registerUpdateProjectTool(server)).not.toThrow();
   });
 });
