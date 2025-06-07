@@ -3,6 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { execSync } from 'child_process';
 import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { homedir } from 'os';
 import { logger } from '../utils/logger.js';
 
 interface ThingsTask {
@@ -102,11 +103,11 @@ const summarySchema = z.object({
 });
 
 function findThingsDatabase(): string {
-  const homeDir = process.env.HOME || '/Users/' + process.env.USER;
+  const homeDir = homedir();
   const thingsGroupContainer = join(homeDir, 'Library/Group Containers');
   
   if (!existsSync(thingsGroupContainer)) {
-    throw new Error('Things group container not found. Please ensure Things.app is installed on macOS.');
+    throw new Error(`Things group container not found in ${thingsGroupContainer}. Please ensure Things.app is installed on macOS.`);
   }
   
   const containers = readdirSync(thingsGroupContainer);
@@ -115,7 +116,7 @@ function findThingsDatabase(): string {
   );
   
   if (!thingsContainer) {
-    throw new Error('Things container not found. Please ensure Things.app is installed and has been launched at least once.');
+    throw new Error(`Things container not found in ${thingsGroupContainer}. Please ensure Things.app is installed and has been launched at least once.`);
   }
   
   const containerPath = join(thingsGroupContainer, thingsContainer);
@@ -155,14 +156,36 @@ function executeSqlQuery(dbPath: string, query: string): any[] {
   }
 }
 
-function formatDate(timestamp: string): string {
+function formatDate(timestamp: string, isDateField: boolean = false): string {
   if (!timestamp || timestamp === '' || timestamp === 'NULL') {
     return '';
   }
   
   try {
-    const date = new Date((parseFloat(timestamp) + 978307200) * 1000);
-    return date.toISOString().split('T')[0];
+    if (isDateField) {
+      // startDate and deadline are stored as bit-packed integers in Things format
+      // Based on Things.py implementation: year, month, day packed in bits
+      const thingsDate = parseInt(timestamp);
+      
+      if (!thingsDate) return '';
+      
+      // Bit masks from Things.py
+      const y_mask = 0b111111111110000000000000000; // Year mask
+      const m_mask = 0b000000000001111000000000000; // Month mask  
+      const d_mask = 0b000000000000000111110000000; // Day mask
+      
+      // Extract year, month, day using bitwise operations
+      const year = (thingsDate & y_mask) >> 16;
+      const month = (thingsDate & m_mask) >> 12;
+      const day = (thingsDate & d_mask) >> 7;
+      
+      // Format as ISO date
+      return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    } else {
+      // creationDate and other timestamps are in Unix epoch format (seconds since 1970)
+      const date = new Date(parseFloat(timestamp) * 1000);
+      return date.toISOString().split('T')[0];
+    }
   } catch {
     return '';
   }
@@ -290,10 +313,10 @@ function getThingsSummary(params: any): ThingsSummary {
     const creationDate = formatDate(row[4]);
     if (creationDate) task.creationDate = creationDate;
     
-    const startDate = formatDate(row[5]);
+    const startDate = formatDate(row[5], true);
     if (startDate) task.startDate = startDate;
     
-    const deadline = formatDate(row[6]);
+    const deadline = formatDate(row[6], true);
     if (deadline) task.deadline = deadline;
     
     if (areaInfo) task.area = { id: areaInfo.id, name: areaInfo.name };
@@ -418,7 +441,8 @@ function generateMarkdownSummary(data: ThingsSummary): string {
   // Header
   lines.push('# Things Database Summary');
   lines.push('');
-  lines.push(`**Generated:** ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`);
+  const now = new Date();
+  lines.push(`**Generated:** ${now.toLocaleDateString('en-US')} ${now.toLocaleTimeString('en-US')}`);
   lines.push(`**Last Updated:** ${data.summary.lastUpdated}`);
   lines.push('');
   
