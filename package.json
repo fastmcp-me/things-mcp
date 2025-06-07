@@ -2,18 +2,24 @@
   "name": "things-mcp",
   "version": "1.0.0",
   "description": "MCP server for Things.app integration on macOS",
-  "main": "./build/index.js",
+  "main": "./build/src/index.js",
   "type": "module",
   "bin": {
-    "things-mcp": "./build/index.js"
+    "things-mcp": "./build/src/index.js"
   },
   "scripts": {
-    "build": "tsc && chmod +x build/index.js",
+    "build": "tsc && chmod +x build/src/index.js",
     "dev": "tsc --watch",
-    "start": "node build/index.js",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "start": "node build/src/index.js",
+    "inspector": "npm run build && npx @modelcontextprotocol/inspector build/src/index.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:applescript": "npm run build && node build/tests/run-applescript-tests.js",
+    "test:applescript:basic": "npm run build && node build/tests/run-applescript-tests.js --basic",
+    "test:applescript:todos": "npm run build && node build/tests/run-applescript-tests.js --todos",
+    "test:applescript:projects": "npm run build && node build/tests/run-applescript-tests.js --projects",
+    "test:applescript:complex": "npm run build && node build/tests/run-applescript-tests.js --complex",
+    "test:applescript:areas": "npm run build && node build/tests/applescript-areas-tags.js"
   },
   "keywords": ["mcp", "things", "macos", "task-management"],
   "author": "",
