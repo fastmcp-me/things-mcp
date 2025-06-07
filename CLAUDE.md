@@ -20,6 +20,10 @@ npm test -- tests/server.test.ts             # Run specific test file
 npm run test:watch                           # Watch mode for tests
 ```
 
+## Memories
+
+- Do not run npm run inspector on your own
+
 ## Architecture Overview
 
 ### MCP Server Design
