@@ -58,7 +58,6 @@ Each tool follows a consistent pattern in `src/tools/`:
 **AppleScript Integration (`src/utils/applescript.ts`):**
 - `executeAppleScript()`: Executes AppleScript commands via `osascript`
 - Data access functions: `listTodos()`, `listProjects()`, `listAreas()`, `listTags()`
-- Delete functions: `deleteTodo()`, `deleteProject()`
 - Filtering support for status, dates, projects, areas, and tags
 
 ### ES Module Configuration
@@ -69,9 +68,12 @@ Each tool follows a consistent pattern in `src/tools/`:
 
 ### Tool Categories
 1. **Creation Tools** (`add_todo`, `add_project`): No auth required, use URL scheme
-2. **Update Tools** (`update_todo`, `update_project`): Require auth token, use URL scheme
+2. **Update Tools** (`update_todo`, `update_project`): Require auth token, use URL scheme with JSON schema structure
+   - Parameters structured as `{id: string, attributes: {...}}` format
+   - Attributes include array fields (tags, checklist-items) converted to comma-separated strings
+   - Support for append/prepend operations on notes and checklist items
+   - Field validation with max lengths and enum constraints
 3. **Read Tools** (`list_todos`, `list_projects`, `list_areas`, `list_tags`): Use AppleScript for data access
-4. **Removal Tools** (`remove_todo`, `remove_project`): Use AppleScript, destructive operations with warnings
 
 ### Testing Strategy
 - Unit tests for URL building and encoding logic
@@ -84,12 +86,12 @@ Each tool follows a consistent pattern in `src/tools/`:
 - Uses `child_process.exec` with `open` command for URL schemes
 - Uses `osascript` command for AppleScript execution
 - Validates `process.platform === 'darwin'`
-- URL scheme for create/update operations, AppleScript for read/delete operations
+- URL scheme for create/update operations, AppleScript for read operations
 
 ### Tool Descriptions
 All tools follow MCP best practices with:
 - Action-oriented descriptions starting with verbs
 - Clear parameter explanations with examples
-- Safety warnings for destructive operations
-- Specific format requirements (ISO dates, comma-separated values)
+- Specific format requirements (ISO dates, array values for update tools)
 - Default value documentation
+- JSON schema compliance for update operations
