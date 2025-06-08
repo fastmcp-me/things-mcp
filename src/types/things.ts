@@ -3,8 +3,6 @@ export type ThingsCommand =
   | 'add-project'
   | 'update'
   | 'update-project'
-  | 'show'
-  | 'search'
   | 'json';
 
 export type WhenValue = 
@@ -15,14 +13,6 @@ export type WhenValue =
   | 'someday'
   | string; // ISO date format
 
-export type ShowTarget = 
-  | 'today'
-  | 'anytime'
-  | 'upcoming'
-  | 'someday'
-  | 'logbook'
-  | 'deadlines'
-  | string; // ID of specific item
 
 export interface AddTodoParams {
   title: string;
@@ -84,14 +74,6 @@ export interface UpdateProjectParams {
   'add-tags'?: string;
 }
 
-export interface ShowParams {
-  id?: ShowTarget;
-  query?: string;
-}
-
-export interface SearchParams {
-  query?: string;
-}
 
 export interface JsonTodo {
   type: 'to-do';
@@ -139,6 +121,4 @@ export type ThingsParams =
   | AddProjectParams
   | UpdateTodoParams
   | UpdateProjectParams
-  | ShowParams
-  | SearchParams
   | JsonImportParams;
