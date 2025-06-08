@@ -17,6 +17,11 @@ This MCP server lets AI assistants interact with your Things.app tasks on macOS.
 ### 1. Install
 
 ```bash
+npm install -g @wenbopan/things-mcp
+```
+
+**Alternative: Development Installation**
+```bash
 git clone https://github.com/your-username/things-mcp.git
 cd things-mcp
 npm install
@@ -46,8 +51,7 @@ Add to your project's `.claude_code_config.json`:
 {
   "mcpServers": {
     "things": {
-      "command": "node",
-      "args": ["/path/to/things-mcp/build/src/index.js"],
+      "command": "things-mcp",
       "env": {
         "THINGS_AUTH_TOKEN": "your-token-here"
       }
@@ -63,8 +67,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 {
   "mcpServers": {
     "things": {
-      "command": "node",
-      "args": ["/path/to/things-mcp/build/src/index.js"],
+      "command": "things-mcp",
       "env": {
         "THINGS_AUTH_TOKEN": "your-token-here"
       }
@@ -79,13 +82,19 @@ Create `.cursor/mcp.json` in your project or `~/.cursor/mcp.json` globally:
 ```json
 {
   "things": {
-    "command": "node",
-    "args": ["/path/to/things-mcp/build/src/index.js"],
+    "command": "things-mcp",
     "env": {
       "THINGS_AUTH_TOKEN": "your-token-here"
     }
   }
 }
+```
+
+**Development Configuration (if using local build):**
+Replace `"things-mcp"` with:
+```json
+"command": "node",
+"args": ["/path/to/things-mcp/build/src/index.js"]
 ```
 
 ### 4. Restart Your AI Assistant
