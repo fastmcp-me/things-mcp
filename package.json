@@ -1,5 +1,5 @@
 {
-  "name": "things-mcp",
+  "name": "@wenbopan/things-mcp",
   "version": "1.0.0",
   "description": "MCP server for Things.app integration on macOS",
   "main": "./build/src/index.js",
