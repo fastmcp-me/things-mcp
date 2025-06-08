@@ -90,16 +90,6 @@ const summarySchema = z.object({
   projects: z.array(z.string())
     .optional()
     .describe('Filter to show only specific projects by name. If not provided, shows all projects'),
-  dateRange: z.object({
-    from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe('Start date in YYYY-MM-DD format'),
-    to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe('End date in YYYY-MM-DD format')
-  })
-    .optional()
-    .describe('Filter items by creation date, start date, or deadline within the specified range'),
-  includeInactive: z.boolean()
-    .optional()
-    .default(false)
-    .describe('Include inactive/hidden areas and empty projects in the summary (default: false)')
 });
 
 function findThingsDatabase(): string {
@@ -359,17 +349,6 @@ function getThingsSummary(params: any): ThingsSummary {
     );
   }
   
-  // Apply date range filtering
-  if (params.dateRange) {
-    filteredTasks = filteredTasks.filter(task => {
-      const dates = [task.creationDate, task.startDate, task.deadline].filter(Boolean);
-      return dates.some(date => {
-        if (date && params.dateRange.from && date < params.dateRange.from) return false;
-        if (date && params.dateRange.to && date > params.dateRange.to) return false;
-        return true;
-      });
-    });
-  }
   
   // Separate tasks by type
   const projects = filteredTasks.filter(task => task.type === 'project');
@@ -397,17 +376,13 @@ function getThingsSummary(params: any): ThingsSummary {
     }
   });
   
-  // Filter areas and tags based on includeInactive
-  const activeAreas = params.includeInactive ? 
-    filteredAreas : 
-    filteredAreas.filter(area => 
-      (area.projects && area.projects.length > 0) || 
-      (area.tasks && area.tasks.length > 0)
-    );
+  // Filter areas and tags to show only active ones
+  const activeAreas = filteredAreas.filter(area => 
+    (area.projects && area.projects.length > 0) || 
+    (area.tasks && area.tasks.length > 0)
+  );
   
-  const activeTags = params.includeInactive ? 
-    tags : 
-    tags.filter(tag => tag.taskCount > 0);
+  const activeTags = tags.filter(tag => tag.taskCount > 0);
   
   const summary: any = {
     summary: {
@@ -692,9 +667,7 @@ export function registerThingsSummaryTool(server: McpServer): void {
             areas: params.areas?.length || 0,
             tags: params.tags?.length || 0,
             projects: params.projects?.length || 0,
-            includeCompleted: params.includeCompleted,
-            includeInactive: params.includeInactive,
-            dateRange: params.dateRange
+            includeCompleted: params.includeCompleted
           }
         });
         

@@ -22,7 +22,7 @@
     "test:applescript:areas": "npm run build && node build/tests/applescript-areas-tags.js"
   },
   "keywords": ["mcp", "things", "macos", "task-management"],
-  "author": "",
+  "author": "panwenbo",
   "license": "MIT",
   "files": ["build"],
   "dependencies": {
