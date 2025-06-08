@@ -23,6 +23,7 @@ npm run test:watch                           # Watch mode for tests
 ## Memories
 
 - Do not run npm run inspector on your own
+- github repo is https://github.com/BMPixel/things-mcp
 
 ## Architecture Overview
 
@@ -128,3 +129,4 @@ All tools follow MCP best practices with:
 - **Creation Date**: Unix epoch format (seconds since 1970)
 - **Start Date/Deadline**: Things bit-packed format requiring bitwise extraction
 - Uses Things.py approach for proper date conversion with year/month/day masks
+```
