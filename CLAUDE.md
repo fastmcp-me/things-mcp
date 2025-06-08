@@ -64,6 +64,17 @@ Each tool follows a consistent pattern in `src/tools/`:
 - Data access functions: `listTodos()`, `listProjects()`, `listAreas()`, `listTags()`
 - Filtering support for status, dates, projects, areas, and tags
 
+**JSON Operations (`src/utils/json-operations.ts`):**
+- `executeJsonOperation()`: Executes JSON-based operations (primarily for completion/cancellation)
+- `waitForOperation()`: Utility for waiting before verification
+- Handles proper JSON encoding for Things URL scheme
+
+**Verification (`src/utils/verification.ts`):**
+- `verifyItemExists()`: Check if item exists in database after operation
+- `verifyItemCompleted()`: Verify item completion status
+- `verifyItemUpdated()`: Verify item updates with expected values
+- Direct SQLite database access for real-time verification
+
 ### ES Module Configuration
 - **Important**: Project uses ES modules (`"type": "module"` in package.json)
 - All imports must use `.js` extensions for TypeScript files
@@ -75,8 +86,9 @@ Each tool follows a consistent pattern in `src/tools/`:
    - Direct parameter structure with validation and descriptions
    - Array fields (tags, checklist-items, initial-todos) converted to comma-separated strings for URL scheme
    - Field validation with max lengths, regex patterns, and enum constraints
-2. **Update Tools** (`update_todo`, `update_project`): Require auth token, use URL scheme with JSON schemas
-   - Direct parameter structure with ID and update fields
+2. **Update Tools** (`update_todo`, `update_project`): Require auth token, use hybrid approach
+   - **JSON Operations**: Completion/cancellation operations use JSON format for reliability
+   - **URL Scheme**: Other updates (title, notes, tags, etc.) use URL scheme for compatibility
    - Array fields (tags, checklist-items) converted to comma-separated strings for URL scheme
    - Support for append/prepend operations on notes and checklist items
    - Field validation with max lengths, regex patterns, and enum constraints
@@ -93,8 +105,10 @@ Each tool follows a consistent pattern in `src/tools/`:
 - Unit tests for URL building and encoding logic (`url-builder.test.ts`)
 - Integration tests for tool registration (`server.test.ts`)
 - Full integration tests for Things URL scheme operations (`integration.test.ts`)
+- **Verification Testing**: Tests include database verification for completion operations
 - Platform detection - tests skip on non-macOS systems
 - ES module compatibility with Jest requires specific configuration
+- Create → Update → Complete lifecycle pattern for comprehensive testing
 
 ### macOS Integration
 - Only works on macOS (Things.app requirement)
