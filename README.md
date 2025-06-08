@@ -1,5 +1,9 @@
 # Things MCP Server
 
+[![npm version](https://badge.fury.io/js/@wenbopan%2Fthings-mcp.svg)](https://badge.fury.io/js/@wenbopan%2Fthings-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![macOS](https://img.shields.io/badge/Platform-macOS-blue.svg)](https://www.apple.com/macos/)
+
 Control your Things.app tasks directly from Claude Code, Claude Desktop, Cursor, and other AI assistants using the Model Context Protocol (MCP).
 
 ## What It Does
@@ -14,21 +18,7 @@ This MCP server lets AI assistants interact with your Things.app tasks on macOS.
 
 ## Quick Start
 
-### 1. Install
-
-```bash
-npm install -g @wenbopan/things-mcp
-```
-
-**Alternative: Development Installation**
-```bash
-git clone https://github.com/your-username/things-mcp.git
-cd things-mcp
-npm install
-npm run build
-```
-
-### 2. Get Things Authorization Token
+### 1. Get Things Authorization Token
 
 For updating existing tasks, you need an authorization token:
 
@@ -36,38 +26,20 @@ For updating existing tasks, you need an authorization token:
 2. Go to **Things → Preferences → General** 
 3. Check **"Enable Things URLs"**
 4. Copy the authorization token that appears
-5. Set it as an environment variable:
 
-```bash
-export THINGS_AUTH_TOKEN="your-token-here"
-```
+### 2. Configure Your AI Assistant
 
-### 3. Configure Your AI Assistant
+<details>
+<summary><strong>Claude Desktop</strong></summary>
 
-#### Claude Code
-Add to your project's `.claude_code_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "things": {
-      "command": "things-mcp",
-      "env": {
-        "THINGS_AUTH_TOKEN": "your-token-here"
-      }
-    }
-  }
-}
-```
-
-#### Claude Desktop
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
 
 ```json
 {
   "mcpServers": {
     "things": {
-      "command": "things-mcp",
+      "command": "npx",
+      "args": ["@wenbopan/things-mcp"],
       "env": {
         "THINGS_AUTH_TOKEN": "your-token-here"
       }
@@ -75,29 +47,27 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   }
 }
 ```
+</details>
 
-#### Cursor IDE
+<details>
+<summary><strong>Cursor IDE</strong></summary>
+
 Create `.cursor/mcp.json` in your project or `~/.cursor/mcp.json` globally:
 
 ```json
 {
   "things": {
-    "command": "things-mcp",
+    "command": "npx",
+    "args": ["@wenbopan/things-mcp"],
     "env": {
       "THINGS_AUTH_TOKEN": "your-token-here"
     }
   }
 }
 ```
+</details>
 
-**Development Configuration (if using local build):**
-Replace `"things-mcp"` with:
-```json
-"command": "node",
-"args": ["/path/to/things-mcp/build/src/index.js"]
-```
-
-### 4. Restart Your AI Assistant
+### 3. Restart Your AI Assistant
 
 After configuration, restart your AI assistant to load the MCP server.
 
@@ -118,43 +88,6 @@ After configuration, restart your AI assistant to load the MCP server.
 ### Quick Capture
 "Create a task to call the dentist, schedule it for tomorrow, and set a deadline for end of week."
 
-## Available Tools
-
-### `things_summary`
-Get a complete overview of your Things database including tasks, projects, areas, and tags. Returns formatted markdown or structured JSON.
-
-### `add_todo` 
-Create new tasks with scheduling, deadlines, tags, and checklist items.
-
-### `add_project`
-Create new projects with initial tasks, areas, and scheduling.
-
-### `update_todo` / `update_project`
-Modify existing items (requires auth token).
-
-### `export_json`
-Export your entire Things database for backup or analysis.
-
-## Requirements
-
-- **macOS** (Things.app requirement)
-- **Things.app** installed and running
-- **Node.js** 20 or higher
-
-## Troubleshooting
-
-### "Things container not found"
-- Ensure Things.app is installed and has been launched at least once
-- Check that you're running on macOS
-
-### "Update operations require auth token"  
-- Follow the authorization token setup steps above
-- Verify the token is correctly set in your environment
-
-### MCP server not loading
-- Check your configuration file syntax
-- Verify the path to the built server file
-- Restart your AI assistant after configuration changes
 
 ## License
 
