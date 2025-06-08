@@ -3,6 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { buildThingsUrl, openThingsUrl } from '../utils/url-builder.js';
 import { requireAuthToken } from '../utils/auth.js';
 import { logger } from '../utils/logger.js';
+import { executeJsonOperation, JsonOperation } from '../utils/json-operations.js';
 
 const updateTodoSchema = z.object({
   id: z.string().min(1).describe('The unique ID of the to-do to update. This ID can be obtained from the list_todos tool'),
@@ -81,38 +82,61 @@ export function registerUpdateTodoTool(server: McpServer): void {
         
         const authToken = requireAuthToken();
         
-        const urlParams: Record<string, any> = {
-          id: params.id,
-          'auth-token': authToken
-        };
+        // Check if we're doing a completion/cancellation operation (use JSON)
+        if (params.completed !== undefined || params.canceled !== undefined) {
+          const attributes: Record<string, any> = {};
+          
+          if (params.completed !== undefined) {
+            attributes.completed = params.completed;
+            if (params.completionDate) {
+              attributes['completion-date'] = params.completionDate;
+            }
+          }
+          
+          if (params.canceled !== undefined) {
+            attributes.canceled = params.canceled;
+          }
+          
+          const operation: JsonOperation = {
+            type: 'to-do',
+            operation: 'update',
+            id: params.id,
+            attributes
+          };
+          
+          await executeJsonOperation(operation, authToken);
+        } else {
+          // Use URL scheme for other updates
+          const urlParams: Record<string, any> = {
+            id: params.id,
+            'auth-token': authToken
+          };
 
-        // Map schema parameters to Things URL scheme parameters
-        if (params.title) urlParams.title = params.title;
-        if (params.notes) urlParams.notes = params.notes;
-        if (params.prependNotes) urlParams['prepend-notes'] = params.prependNotes;
-        if (params.appendNotes) urlParams['append-notes'] = params.appendNotes;
-        if (params.when) urlParams.when = params.when;
-        if (params.deadline) urlParams.deadline = params.deadline;
-        if (params.tags) urlParams.tags = params.tags.join(',');
-        if (params.addTags) urlParams['add-tags'] = params.addTags.join(',');
-        if (params.checklistItems) urlParams['checklist-items'] = params.checklistItems.join(',');
-        if (params.prependChecklistItems) urlParams['prepend-checklist-items'] = params.prependChecklistItems.join(',');
-        if (params.appendChecklistItems) urlParams['append-checklist-items'] = params.appendChecklistItems.join(',');
-        if (params.projectId) urlParams['list-id'] = params.projectId;
-        if (params.projectName) urlParams.list = params.projectName;
-        if (params.areaId) urlParams['area-id'] = params.areaId;
-        if (params.areaName) urlParams.area = params.areaName;
-        if (params.headingId) urlParams['heading-id'] = params.headingId;
-        if (params.headingName) urlParams.heading = params.headingName;
-        if (params.completed !== undefined) urlParams.completed = params.completed;
-        if (params.canceled !== undefined) urlParams.canceled = params.canceled;
-        if (params.creationDate) urlParams['creation-date'] = params.creationDate;
-        if (params.completionDate) urlParams['completion-date'] = params.completionDate;
-        
-        const url = buildThingsUrl('update', urlParams);
-        logger.debug('Generated URL', { url: url.replace(authToken, '***') });
-        
-        await openThingsUrl(url);
+          // Map schema parameters to Things URL scheme parameters
+          if (params.title) urlParams.title = params.title;
+          if (params.notes) urlParams.notes = params.notes;
+          if (params.prependNotes) urlParams['prepend-notes'] = params.prependNotes;
+          if (params.appendNotes) urlParams['append-notes'] = params.appendNotes;
+          if (params.when) urlParams.when = params.when;
+          if (params.deadline) urlParams.deadline = params.deadline;
+          if (params.tags) urlParams.tags = params.tags.join(',');
+          if (params.addTags) urlParams['add-tags'] = params.addTags.join(',');
+          if (params.checklistItems) urlParams['checklist-items'] = params.checklistItems.join(',');
+          if (params.prependChecklistItems) urlParams['prepend-checklist-items'] = params.prependChecklistItems.join(',');
+          if (params.appendChecklistItems) urlParams['append-checklist-items'] = params.appendChecklistItems.join(',');
+          if (params.projectId) urlParams['list-id'] = params.projectId;
+          if (params.projectName) urlParams.list = params.projectName;
+          if (params.areaId) urlParams['area-id'] = params.areaId;
+          if (params.areaName) urlParams.area = params.areaName;
+          if (params.headingId) urlParams['heading-id'] = params.headingId;
+          if (params.headingName) urlParams.heading = params.headingName;
+          if (params.creationDate) urlParams['creation-date'] = params.creationDate;
+          
+          const url = buildThingsUrl('update', urlParams);
+          logger.debug('Generated URL', { url: url.replace(authToken, '***') });
+          
+          await openThingsUrl(url);
+        }
         
         return {
           content: [{
