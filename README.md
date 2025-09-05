@@ -1,3 +1,8 @@
+[![Add to Cursor](https://fastmcp.me/badges/cursor_dark.svg)](https://fastmcp.me/MCP/Details/778/things)
+[![Add to VS Code](https://fastmcp.me/badges/vscode_dark.svg)](https://fastmcp.me/MCP/Details/778/things)
+[![Add to Claude](https://fastmcp.me/badges/claude_dark.svg)](https://fastmcp.me/MCP/Details/778/things)
+[![Add to ChatGPT](https://fastmcp.me/badges/chatgpt_dark.svg)](https://fastmcp.me/MCP/Details/778/things)
+
 # Things MCP Server
 
 [![npm version](https://badge.fury.io/js/@wenbopan%2Fthings-mcp.svg)](https://badge.fury.io/js/@wenbopan%2Fthings-mcp)
